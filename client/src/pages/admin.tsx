@@ -4,7 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { P4PConfigForm } from '@/components/admin/P4PConfigForm';
 import { EmployeeManagement } from '@/components/admin/EmployeeManagement';
 import { IncidentManagement } from '@/components/admin/IncidentManagement';
-import { Settings, Users, DollarSign, BarChart3, AlertTriangle } from 'lucide-react';
+import { ProjectTracking } from '@/components/admin/ProjectTracking';
+import { JobAssignmentForm } from '@/components/admin/JobAssignmentForm';
+import { DataInputWorkflow } from '@/components/admin/DataInputWorkflow';
+import { Settings, Users, DollarSign, BarChart3, AlertTriangle, Calendar, Briefcase } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 
@@ -27,21 +30,73 @@ export default function Admin() {
           </Link>
         </div>
 
-        <Tabs defaultValue="p4p-config" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="p4p-config" className="flex items-center space-x-2">
-              <DollarSign className="w-4 h-4" />
-              <span>P4P Configuration</span>
+        <Tabs defaultValue="workflow" className="w-full">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="workflow" className="flex items-center space-x-2">
+              <BarChart3 className="w-4 h-4" />
+              <span>Workflow</span>
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4" />
+              <span>Projects</span>
+            </TabsTrigger>
+            <TabsTrigger value="assignments" className="flex items-center space-x-2">
+              <Briefcase className="w-4 h-4" />
+              <span>Job Tracking</span>
             </TabsTrigger>
             <TabsTrigger value="employees" className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
-              <span>Employee Management</span>
+              <span>Employees</span>
             </TabsTrigger>
             <TabsTrigger value="incidents" className="flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4" />
-              <span>Incidents & Yellow Slips</span>
+              <span>Incidents</span>
+            </TabsTrigger>
+            <TabsTrigger value="p4p-config" className="flex items-center space-x-2">
+              <DollarSign className="w-4 h-4" />
+              <span>P4P Config</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="workflow" className="space-y-6">
+            <DataInputWorkflow />
+          </TabsContent>
+
+          <TabsContent value="projects" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Calendar className="w-5 h-5" />
+                  <span>Project & Job Management</span>
+                </CardTitle>
+                <CardDescription>
+                  Create and manage mowing routes, landscaping projects, and maintenance jobs.
+                  Track budgeted vs actual hours for accurate P4P calculations.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProjectTracking />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="assignments" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Briefcase className="w-5 h-5" />
+                  <span>Job Assignment & Time Tracking</span>
+                </CardTitle>
+                <CardDescription>
+                  Assign employees to jobs and track actual hours worked.
+                  System automatically calculates P4P based on efficiency, bonuses, and company policies.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <JobAssignmentForm />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="p4p-config" className="space-y-6">
             <Card>

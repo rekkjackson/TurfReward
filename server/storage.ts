@@ -64,6 +64,9 @@ export interface IStorage {
   getIncidents(): Promise<Incident[]>;
   createIncident(incident: InsertIncident): Promise<Incident>;
 
+  // Enhanced job methods
+  updateJob(id: string, data: Partial<Job>): Promise<Job | null>;
+
   // Dashboard specific methods
   getDashboardData(): Promise<{
     todayMetrics: CompanyMetric | undefined;
@@ -385,6 +388,15 @@ export class DatabaseStorage implements IStorage {
   async createIncident(incidentData: InsertIncident): Promise<Incident> {
     const [incident] = await db.insert(incidents).values(incidentData).returning();
     return incident;
+  }
+
+  async updateJob(id: string, updateData: Partial<Job>): Promise<Job | null> {
+    const [job] = await db
+      .update(jobs)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(jobs.id, id))
+      .returning();
+    return job || null;
   }
 }
 

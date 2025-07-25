@@ -67,13 +67,42 @@ The backend provides RESTful endpoints for:
 - **Employee Performance Grid**: Individual performance tracking
 - **Goals & Metrics Zone**: Weekly targets and satisfaction scores
 
-## Data Flow
+## Data Flow & Input Workflow
 
-1. **Data Entry**: Jobs and performance data entered through admin interface
-2. **Calculation Engine**: P4P configurations determine performance pay
-3. **Real-time Updates**: WebSocket broadcasts changes to connected dashboards
-4. **Performance Tracking**: Metrics calculated and stored for reporting
-5. **Visual Display**: Dashboard components render live performance data
+### Comprehensive Project Tracking System
+
+The system now handles both one-day jobs (mowing routes) and multi-day projects (landscaping) with a complete data input workflow:
+
+#### Daily Workflow Process:
+1. **Project Creation**: Admin creates jobs with customer info, budgeted hours, and labor revenue
+2. **Team Assignment**: Employees assigned to jobs with roles (leader, training) and actual hours tracked
+3. **Performance Calculation**: System auto-calculates P4P based on:
+   - 33% labor revenue (40% March-May seasonal bonus)
+   - $18/hour minimum wage protection
+   - $4/hour training bonus when applicable
+   - $1.50/budgeted hour for large jobs (49+ hours)
+4. **Quality Tracking**: Yellow slips, property damage, and equipment issues logged and affect pay
+5. **Job Completion**: Final calculations performed when job status set to completed
+
+#### Job Categories:
+- **One-Day Jobs**: Mowing routes, maintenance - immediate completion tracking
+- **Multi-Day Projects**: Landscaping, cleanups - span multiple days with progress tracking
+- **Large Job Bonuses**: Automatically calculated for jobs 49+ budgeted hours
+
+#### P4P Calculation Rules (from business document):
+- Base: 33% of labor revenue split among team
+- Seasonal: 40% rate March-May instead of 33%
+- Minimum: Cannot average less than $18/hour per pay period
+- Training: $4/hour bonus for employee training (manager approved)
+- Large Jobs: $1.50 per budgeted hour for 49+ hour jobs
+- Quality Control: Yellow slip costs deducted from performance pay
+- Damage Costs: Property/equipment damage deducted from performance pay (not base pay)
+
+#### Data Sources:
+1. **Job Input**: Customer details, budgeted hours, labor revenue, job type
+2. **Time Tracking**: Actual hours worked per employee per job
+3. **Quality Incidents**: Yellow slips, property damage, equipment issues with costs
+4. **Performance Metrics**: Efficiency calculations, revenue tracking, customer satisfaction
 
 ## External Dependencies
 

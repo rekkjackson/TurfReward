@@ -29,14 +29,28 @@ export const p4pConfigs = pgTable("p4p_configs", {
 
 export const jobs = pgTable("jobs", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  jobType: text("job_type").notNull(), // 'mowing', 'landscaping', 'maintenance'
+  jobNumber: text("job_number").unique(),
+  jobType: text("job_type").notNull(), // 'mowing', 'landscaping', 'maintenance', 'cleanup'
+  category: text("category").notNull().default("one_day"), // 'one_day', 'multi_day'
   customerName: text("customer_name").notNull(),
-  budgetedHours: decimal("budgeted_hours", { precision: 10, scale: 2 }),
+  customerAddress: text("customer_address"),
+  customerPhone: text("customer_phone"),
+  budgetedHours: decimal("budgeted_hours", { precision: 10, scale: 2 }).notNull(),
   actualHours: decimal("actual_hours", { precision: 10, scale: 2 }),
-  laborRevenue: decimal("labor_revenue", { precision: 10, scale: 2 }),
-  status: text("status").notNull().default("pending"), // 'pending', 'in_progress', 'completed', 'yellow_slip'
+  laborRevenue: decimal("labor_revenue", { precision: 10, scale: 2 }).notNull(),
+  materialsCost: decimal("materials_cost", { precision: 10, scale: 2 }).default("0.00"),
+  totalJobValue: decimal("total_job_value", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pending"), // 'pending', 'in_progress', 'completed', 'yellow_slip', 'on_hold'
+  priority: text("priority").default("normal"), // 'low', 'normal', 'high', 'urgent'
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  estimatedDuration: integer("estimated_duration_days").default(1),
+  isLargejob: boolean("is_largejob").default(false), // 49+ budgeted hours
+  isSeasonalBonus: boolean("is_seasonal_bonus").default(false), // March-May 40% vs 33%
+  notes: text("notes"),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const jobAssignments = pgTable("job_assignments", {

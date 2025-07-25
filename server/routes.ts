@@ -236,6 +236,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced job routes for project tracking
+  app.patch("/api/jobs/:id", async (req, res) => {
+    try {
+      const job = await storage.updateJob(req.params.id, req.body);
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      res.json(job);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update job" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates
