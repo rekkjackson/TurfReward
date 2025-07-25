@@ -3,7 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { P4PConfigForm } from '@/components/admin/P4PConfigForm';
 import { EmployeeManagement } from '@/components/admin/EmployeeManagement';
-import { Settings, Users, DollarSign, BarChart3 } from 'lucide-react';
+import { IncidentManagement } from '@/components/admin/IncidentManagement';
+import { Settings, Users, DollarSign, BarChart3, AlertTriangle } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 
@@ -27,7 +28,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="p4p-config" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="p4p-config" className="flex items-center space-x-2">
               <DollarSign className="w-4 h-4" />
               <span>P4P Configuration</span>
@@ -35,6 +36,10 @@ export default function Admin() {
             <TabsTrigger value="employees" className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
               <span>Employee Management</span>
+            </TabsTrigger>
+            <TabsTrigger value="incidents" className="flex items-center space-x-2">
+              <AlertTriangle className="w-4 h-4" />
+              <span>Incidents & Yellow Slips</span>
             </TabsTrigger>
           </TabsList>
 
@@ -58,6 +63,24 @@ export default function Admin() {
 
           <TabsContent value="employees" className="space-y-6">
             <EmployeeManagement />
+          </TabsContent>
+
+          <TabsContent value="incidents" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  <span>Incident & Yellow Slip Tracking</span>
+                </CardTitle>
+                <CardDescription>
+                  Track quality issues, property damage, and yellow slips for P4P calculations.
+                  These incidents affect performance pay and profit sharing eligibility.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <IncidentManagement />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

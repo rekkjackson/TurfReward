@@ -71,9 +71,9 @@ export function P4PConfigForm() {
     setSelectedConfig(config.id);
     form.reset({
       jobType: config.jobType,
-      laborRevenuePercentage: config.laborRevenuePercentage,
+      laborRevenuePercentage: config.laborRevenuePercentage || '33.00',
       seasonalBonus: config.seasonalBonus || '0.00',
-      minimumHourlyRate: config.minimumHourlyRate,
+      minimumHourlyRate: config.minimumHourlyRate || '18.00',
       trainingBonusPerHour: config.trainingBonusPerHour,
       largejobBonusThreshold: config.largejobBonusThreshold || 49,
       largejobBonusPerHour: config.largejobBonusPerHour,
@@ -97,7 +97,7 @@ export function P4PConfigForm() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {configs?.map((config: P4PConfig) => (
+            {configs && configs.map((config: P4PConfig) => (
               <div
                 key={config.id}
                 className="p-4 border rounded-lg cursor-pointer hover:bg-accent"

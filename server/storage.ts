@@ -60,6 +60,10 @@ export interface IStorage {
   createCompanyMetric(metric: InsertCompanyMetric): Promise<CompanyMetric>;
   getLatestCompanyMetric(): Promise<CompanyMetric | undefined>;
 
+  // Incident methods
+  getIncidents(): Promise<Incident[]>;
+  createIncident(incident: InsertIncident): Promise<Incident>;
+
   // Dashboard specific methods
   getDashboardData(): Promise<{
     todayMetrics: CompanyMetric | undefined;
@@ -68,6 +72,13 @@ export interface IStorage {
     weeklyRevenue: { current: number; target: number };
     yellowSlipCount: number;
     customerSatisfaction: number;
+    damageCases: {
+      yellowSlipCount: number;
+      propertyCasualties: number;
+      equipmentDamage: number;
+      totalCost: number;
+      weeklyTrend: number;
+    };
   }>;
 }
 
@@ -141,11 +152,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJobAssignments(): Promise<(JobAssignment & { employee: Employee; job: Job })[]> {
-    return db
+    const results = await db
       .select()
       .from(jobAssignments)
       .innerJoin(employees, eq(jobAssignments.employeeId, employees.id))
       .innerJoin(jobs, eq(jobAssignments.jobId, jobs.id));
+    
+    return results.map(result => ({
+      ...result.job_assignments,
+      employee: result.employees,
+      job: result.jobs
+    }));
   }
 
   async createJobAssignment(assignment: InsertJobAssignment): Promise<JobAssignment> {
@@ -169,7 +186,7 @@ export class DatabaseStorage implements IStorage {
       query = query.where(and(...conditions));
     }
 
-    return query.orderBy(desc(performanceMetrics.date));
+    return await query.orderBy(desc(performanceMetrics.date));
   }
 
   async createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric> {
@@ -182,7 +199,7 @@ export class DatabaseStorage implements IStorage {
     if (employeeId) {
       query = query.where(eq(incidents.employeeId, employeeId));
     }
-    return query.orderBy(desc(incidents.createdAt));
+    return await query.orderBy(desc(incidents.createdAt));
   }
 
   async createIncident(incident: InsertIncident): Promise<Incident> {
@@ -201,7 +218,7 @@ export class DatabaseStorage implements IStorage {
       query = query.where(and(...conditions));
     }
 
-    return query.orderBy(desc(companyMetrics.date));
+    return await query.orderBy(desc(companyMetrics.date));
   }
 
   async createCompanyMetric(metric: InsertCompanyMetric): Promise<CompanyMetric> {
@@ -310,6 +327,40 @@ export class DatabaseStorage implements IStorage {
 
     const customerSatisfaction = Number(satisfactionData?.avgSatisfaction || 5.0);
 
+    // Get damage cases data
+    const [propertyCasualtyData] = await db
+      .select({
+        count: sql<number>`COUNT(*)`,
+        totalCost: sql<number>`SUM(${incidents.cost})`,
+      })
+      .from(incidents)
+      .where(
+        and(
+          eq(incidents.type, 'property_damage'),
+          gte(incidents.createdAt, weekStart)
+        )
+      );
+
+    const [equipmentDamageData] = await db
+      .select({
+        count: sql<number>`COUNT(*)`,
+        totalCost: sql<number>`SUM(${incidents.cost})`,
+      })
+      .from(incidents)
+      .where(
+        and(
+          eq(incidents.type, 'equipment_damage'),
+          gte(incidents.createdAt, weekStart)
+        )
+      );
+
+    const propertyCasualties = Number(propertyCasualtyData?.count || 0);
+    const equipmentDamage = Number(equipmentDamageData?.count || 0);
+    const totalDamageCost = Number(propertyCasualtyData?.totalCost || 0) + Number(equipmentDamageData?.totalCost || 0);
+
+    // Calculate weekly trend (simplified - would need last week's data for accurate calculation)
+    const weeklyTrend = -15; // Placeholder for now
+
     return {
       todayMetrics,
       topPerformer,
@@ -317,7 +368,23 @@ export class DatabaseStorage implements IStorage {
       weeklyRevenue,
       yellowSlipCount,
       customerSatisfaction,
+      damageCases: {
+        yellowSlipCount,
+        propertyCasualties,
+        equipmentDamage,
+        totalCost: totalDamageCost,
+        weeklyTrend,
+      },
     };
+  }
+
+  async getIncidents(): Promise<Incident[]> {
+    return await db.select().from(incidents).orderBy(desc(incidents.createdAt));
+  }
+
+  async createIncident(incidentData: InsertIncident): Promise<Incident> {
+    const [incident] = await db.insert(incidents).values(incidentData).returning();
+    return incident;
   }
 }
 

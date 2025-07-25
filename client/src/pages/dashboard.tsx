@@ -5,8 +5,11 @@ import { EfficiencyOverview } from '@/components/dashboard/EfficiencyOverview';
 import { TopPerformerSpotlight } from '@/components/dashboard/TopPerformerSpotlight';
 import { EmployeePerformanceGrid } from '@/components/dashboard/EmployeePerformanceGrid';
 import { GoalsMetricsZone } from '@/components/dashboard/GoalsMetricsZone';
+import { DamageCasesTracker } from '@/components/dashboard/DamageCasesTracker';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { Loader2, WifiOff } from 'lucide-react';
+import { Loader2, WifiOff, Settings } from 'lucide-react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
   const { data, isLoading, error, isConnected } = useDashboardData();
@@ -52,7 +55,8 @@ export default function Dashboard() {
     weeklyRevenue,
     yellowSlipCount,
     customerSatisfaction,
-  } = data;
+    damageCases,
+  } = data || {};
 
   return (
     <div className="bg-slate-dark font-inter text-white min-h-screen overflow-hidden">
@@ -63,6 +67,16 @@ export default function Dashboard() {
           <span>Offline</span>
         </div>
       )}
+      
+      {/* Admin Panel Access */}
+      <div className="fixed top-4 left-4 z-50">
+        <Link href="/admin">
+          <Button variant="outline" size="sm" className="bg-slate-medium/80 backdrop-blur border-slate-light hover:bg-slate-light">
+            <Settings className="w-4 h-4 mr-2" />
+            Admin Panel
+          </Button>
+        </Link>
+      </div>
       
       <div className="h-screen p-4 grid grid-cols-12 grid-rows-8 gap-4">
         <DashboardHeader
@@ -93,10 +107,18 @@ export default function Dashboard() {
 
         <EmployeePerformanceGrid employees={employeePerformance || []} />
 
+        <DamageCasesTracker
+          yellowSlipCount={damageCases?.yellowSlipCount || 0}
+          propertyCasualties={damageCases?.propertyCasualties || 0}
+          equipmentDamage={damageCases?.equipmentDamage || 0}
+          totalCost={damageCases?.totalCost || 0}
+          weeklyTrend={damageCases?.weeklyTrend || 0}
+        />
+
         <GoalsMetricsZone
-          weeklyRevenue={weeklyRevenue}
-          yellowSlipCount={yellowSlipCount}
-          customerSatisfaction={customerSatisfaction}
+          weeklyRevenue={weeklyRevenue || { current: 0, target: 40000 }}
+          yellowSlipCount={yellowSlipCount || 0}
+          customerSatisfaction={customerSatisfaction || 5.0}
         />
       </div>
     </div>

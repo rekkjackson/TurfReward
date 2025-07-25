@@ -216,6 +216,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Incidents endpoints
+  app.get("/api/incidents", async (req, res) => {
+    try {
+      const incidents = await storage.getIncidents();
+      res.json(incidents);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch incidents" });
+    }
+  });
+
+  app.post("/api/incidents", async (req, res) => {
+    try {
+      const validatedData = insertIncidentSchema.parse(req.body);
+      const incident = await storage.createIncident(validatedData);
+      res.status(201).json(incident);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create incident" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates
