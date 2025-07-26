@@ -37,7 +37,7 @@ export function IncidentManagement() {
     resolver: zodResolver(insertIncidentSchema.omit({ id: true, createdAt: true, updatedAt: true })),
     defaultValues: {
       employeeId: '',
-      jobId: '',
+      jobId: 'none',
       type: 'yellow_slip',
       description: '',
       cost: '0.00',
@@ -60,7 +60,12 @@ export function IncidentManagement() {
   });
 
   const onSubmit = (data: any) => {
-    createMutation.mutate(data);
+    // Handle "none" value for optional jobId
+    const submitData = {
+      ...data,
+      jobId: data.jobId === 'none' ? null : data.jobId
+    };
+    createMutation.mutate(submitData);
   };
 
   const getIncidentIcon = (type: string) => {
@@ -154,7 +159,7 @@ export function IncidentManagement() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">No specific job</SelectItem>
+                          <SelectItem value="none">No specific job</SelectItem>
                           {jobs.map((job: any) => (
                             <SelectItem key={job.id} value={job.id}>
                               {job.jobNumber} - {job.customerName || 'Internal Job'}
