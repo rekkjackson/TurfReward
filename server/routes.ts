@@ -119,17 +119,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const assignments = await storage.getJobAssignments();
       res.json(assignments);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch job assignments" });
+      console.error('Error fetching job assignments:', error);
+      res.status(500).json({ message: "Failed to fetch job assignments", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
   app.post("/api/job-assignments", async (req, res) => {
     try {
+      console.log('Received job assignment data:', req.body);
       const validatedData = insertJobAssignmentSchema.parse(req.body);
+      console.log('Validated job assignment data:', validatedData);
       const assignment = await storage.createJobAssignment(validatedData);
       res.status(201).json(assignment);
     } catch (error) {
-      res.status(400).json({ message: "Invalid job assignment data" });
+      console.error('Error creating job assignment:', error);
+      res.status(400).json({ 
+        message: "Invalid job assignment data", 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 

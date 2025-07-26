@@ -158,17 +158,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJobAssignments(): Promise<(JobAssignment & { employee: Employee; job: Job })[]> {
-    const results = await db
-      .select()
-      .from(jobAssignments)
-      .innerJoin(employees, eq(jobAssignments.employeeId, employees.id))
-      .innerJoin(jobs, eq(jobAssignments.jobId, jobs.id));
-    
-    return results.map(result => ({
-      ...result.job_assignments,
-      employee: result.employees,
-      job: result.jobs
-    }));
+    try {
+      const results = await db
+        .select()
+        .from(jobAssignments)
+        .innerJoin(employees, eq(jobAssignments.employeeId, employees.id))
+        .innerJoin(jobs, eq(jobAssignments.jobId, jobs.id));
+      
+      return results.map(result => ({
+        ...result.job_assignments,
+        employee: result.employees,
+        job: result.jobs
+      }));
+    } catch (error) {
+      console.error('Error fetching job assignments:', error);
+      return [];
+    }
   }
 
   async createJobAssignment(assignment: InsertJobAssignment): Promise<JobAssignment> {
