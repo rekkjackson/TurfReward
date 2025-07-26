@@ -49,22 +49,18 @@ export function ProjectTracking() {
   });
 
   const form = useForm({
-    resolver: zodResolver(insertJobSchema.extend({
-      jobNumber: insertJobSchema.shape.jobNumber.optional(),
-      startDate: insertJobSchema.shape.startDate.optional(),
-      endDate: insertJobSchema.shape.endDate.optional(),
-    })),
+    resolver: zodResolver(insertJobSchema),
     defaultValues: {
       jobNumber: '',
-      jobType: '',
+      jobType: 'mowing',
       category: 'one_day',
       customerName: '',
       customerAddress: '',
       customerPhone: '',
       budgetedHours: '8.00',
-      laborRevenue: '0.00',
+      laborRevenue: '400.00',
       materialsCost: '0.00',
-      totalJobValue: '0.00',
+      totalJobValue: '400.00',
       priority: 'normal',
       estimatedDuration: 1,
       isLargejob: false,
@@ -82,8 +78,13 @@ export function ProjectTracking() {
       form.reset();
       setDialogOpen(false);
     },
-    onError: () => {
-      toast({ title: 'Error', description: 'Failed to create job', variant: 'destructive' });
+    onError: (error: any) => {
+      console.error('Job creation error:', error);
+      toast({ 
+        title: 'Error', 
+        description: error?.response?.data?.error || 'Failed to create job', 
+        variant: 'destructive' 
+      });
     },
   });
 
@@ -101,6 +102,8 @@ export function ProjectTracking() {
   });
 
   const onSubmit = (data: any) => {
+    console.log('Form data before processing:', data);
+    
     // Auto-generate job number if not provided
     if (!data.jobNumber) {
       const prefix = data.jobType.charAt(0).toUpperCase();
@@ -115,7 +118,13 @@ export function ProjectTracking() {
     const currentMonth = new Date().getMonth() + 1;
     data.isSeasonalBonus = currentMonth >= 3 && currentMonth <= 5;
 
-    createMutation.mutate(data);
+    // Remove empty fields that might cause validation issues
+    const cleanedData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
+    );
+
+    console.log('Cleaned data for submission:', cleanedData);
+    createMutation.mutate(cleanedData);
   };
 
   const getStatusIcon = (status: string) => {

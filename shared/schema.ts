@@ -146,6 +146,7 @@ export const insertP4PConfigSchema = createInsertSchema(p4pConfigs).omit({
 export const insertJobSchema = createInsertSchema(jobs).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertJobAssignmentSchema = createInsertSchema(jobAssignments).omit({

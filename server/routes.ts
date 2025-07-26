@@ -98,11 +98,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/jobs", async (req, res) => {
     try {
+      console.log('Received job data:', req.body);
       const validatedData = insertJobSchema.parse(req.body);
+      console.log('Validated job data:', validatedData);
       const job = await storage.createJob(validatedData);
       res.status(201).json(job);
     } catch (error) {
-      res.status(400).json({ message: "Invalid job data" });
+      console.error('Job creation error:', error);
+      res.status(400).json({ 
+        message: "Invalid job data", 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
