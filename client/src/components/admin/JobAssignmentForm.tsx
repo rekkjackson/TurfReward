@@ -51,9 +51,16 @@ export function JobAssignmentForm() {
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
       toast({ title: 'Success', description: 'Job assignment created successfully' });
       form.reset();
+      // Keep the job selected for easier multiple assignments
+      form.setValue('jobId', selectedJobId);
     },
-    onError: () => {
-      toast({ title: 'Error', description: 'Failed to create assignment', variant: 'destructive' });
+    onError: (error: any) => {
+      console.error('Job assignment error:', error);
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to create assignment', 
+        variant: 'destructive' 
+      });
     },
   });
 
@@ -67,8 +74,30 @@ export function JobAssignmentForm() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiRequest('DELETE', `/api/job-assignments/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/job-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
+      toast({ title: 'Success', description: 'Assignment deleted successfully' });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to delete assignment', 
+        variant: 'destructive' 
+      });
+    },
+  });
+
   const onSubmit = (data: any) => {
-    createMutation.mutate(data);
+    // Ensure the selected job ID is included
+    const submissionData = {
+      ...data,
+      jobId: selectedJobId,
+    };
+    console.log('Submitting job assignment:', submissionData);
+    createMutation.mutate(submissionData);
   };
 
   const calculatePerformancePay = (job: Job, assignment: any) => {
@@ -108,6 +137,10 @@ export function JobAssignmentForm() {
         completedAt: new Date().toISOString(),
       }
     });
+  };
+
+  const deleteAssignment = (assignmentId: string) => {
+    deleteMutation.mutate(assignmentId);
   };
 
   const activeJobs = jobs.filter((job: any) => ['pending', 'in_progress'].includes(job.status));
@@ -349,11 +382,20 @@ export function JobAssignmentForm() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium">${calculatedPay.toFixed(2)}</div>
-                      <div className="text-sm text-muted-foreground">
-                        ${(calculatedPay / parseFloat(assignment.hoursWorked || '1')).toFixed(2)}/h
+                    <div className="flex items-center space-x-2">
+                      <div className="text-right">
+                        <div className="font-medium">${calculatedPay.toFixed(2)}</div>
+                        <div className="text-sm text-muted-foreground">
+                          ${(calculatedPay / parseFloat(assignment.hoursWorked || '1')).toFixed(2)}/h
+                        </div>
                       </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => deleteAssignment(assignment.id)}
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 );
