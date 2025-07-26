@@ -7,6 +7,7 @@ import { IncidentManagement } from '@/components/admin/IncidentManagement';
 import { ProjectTracking } from '@/components/admin/ProjectTracking';
 import { JobAssignmentForm } from '@/components/admin/JobAssignmentForm';
 import { DataInputWorkflow } from '@/components/admin/DataInputWorkflow';
+import { PayrollDashboard } from '@/components/admin/PayrollDashboard';
 import { Settings, Users, DollarSign, BarChart3, AlertTriangle, Calendar, Briefcase } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="workflow" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="workflow" className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4" />
               <span>Workflow</span>
@@ -44,6 +45,10 @@ export default function Admin() {
               <Briefcase className="w-4 h-4" />
               <span>Job Tracking</span>
             </TabsTrigger>
+            <TabsTrigger value="payroll" className="flex items-center space-x-2">
+              <DollarSign className="w-4 h-4" />
+              <span>Payroll</span>
+            </TabsTrigger>
             <TabsTrigger value="employees" className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
               <span>Employees</span>
@@ -53,7 +58,7 @@ export default function Admin() {
               <span>Incidents</span>
             </TabsTrigger>
             <TabsTrigger value="p4p-config" className="flex items-center space-x-2">
-              <DollarSign className="w-4 h-4" />
+              <Settings className="w-4 h-4" />
               <span>P4P Config</span>
             </TabsTrigger>
           </TabsList>
@@ -114,6 +119,10 @@ export default function Admin() {
                 <P4PConfigForm />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="payroll" className="space-y-6">
+            <PayrollDashboard />
           </TabsContent>
 
           <TabsContent value="employees" className="space-y-6">
