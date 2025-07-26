@@ -356,6 +356,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Job not found" });
       }
       
+      // Calculate P4P when job is marked as completed
+      if (updateData.status === 'completed') {
+        try {
+          const { P4PCalculationEngine } = await import('./p4pCalculations');
+          console.log(`Job ${job.customerName} marked complete - calculating P4P...`);
+          const p4pResults = await P4PCalculationEngine.calculateP4PForJob(req.params.id);
+          console.log(`P4P calculated for ${p4pResults.length} assignments`);
+        } catch (p4pError) {
+          console.error('P4P calculation error:', p4pError);
+          // Don't fail the job update if P4P calculation fails
+        }
+      }
+      
       // Broadcast dashboard update after job update
       try {
         const dashboardData = await storage.getDashboardData();

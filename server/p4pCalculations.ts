@@ -1,0 +1,200 @@
+import { db } from './db';
+import { jobs, jobAssignments, p4pConfigs, employees } from '@shared/schema';
+import { eq, and } from 'drizzle-orm';
+
+interface P4PCalculationResult {
+  assignmentId: string;
+  performancePay: number;
+  hourlyEquivalent: number;
+  details: {
+    laborRevenue: number;
+    revenuePercentage: number;
+    teamSize: number;
+    hoursWorked: number;
+    baseCalculation: number;
+    trainingBonus: number;
+    largejobBonus: number;
+    seasonalBonus: number;
+    minimumWageGap: number;
+  };
+}
+
+export class P4PCalculationEngine {
+  
+  /**
+   * Calculate P4P for a specific job assignment based on business rules
+   */
+  static async calculateP4PForAssignment(assignmentId: string): Promise<P4PCalculationResult | null> {
+    try {
+      // Get assignment details with job and employee info
+      const [assignment] = await db
+        .select({
+          assignment: jobAssignments,
+          job: jobs,
+          employee: employees
+        })
+        .from(jobAssignments)
+        .leftJoin(jobs, eq(jobAssignments.jobId, jobs.id))
+        .leftJoin(employees, eq(jobAssignments.employeeId, employees.id))
+        .where(eq(jobAssignments.id, assignmentId));
+
+      if (!assignment || !assignment.job || !assignment.employee) {
+        console.error(`Assignment not found or missing data: ${assignmentId}`);
+        return null;
+      }
+
+      // Get P4P configuration for this job type
+      const [p4pConfig] = await db
+        .select()
+        .from(p4pConfigs)
+        .where(and(
+          eq(p4pConfigs.jobType, assignment.job.jobType),
+          eq(p4pConfigs.isActive, true)
+        ));
+
+      if (!p4pConfig) {
+        console.error(`No P4P config found for job type: ${assignment.job.jobType}`);
+        return null;
+      }
+
+      // Get all team members for this job
+      const teamAssignments = await db
+        .select()
+        .from(jobAssignments)
+        .where(eq(jobAssignments.jobId, assignment.job.id));
+
+      const teamSize = teamAssignments.length;
+      const hoursWorked = parseFloat(assignment.assignment.hoursWorked || '0');
+      const laborRevenue = parseFloat(assignment.job.laborRevenue || '0');
+      const budgetedHours = parseFloat(assignment.job.budgetedHours || '0');
+
+      if (hoursWorked === 0) {
+        console.warn(`No hours worked for assignment: ${assignmentId}`);
+        return null;
+      }
+
+      // Calculate base P4P using business rules
+      const revenuePercentage = parseFloat(p4pConfig.laborRevenuePercentage || '33') / 100;
+      
+      // Base calculation: % of labor revenue split among team
+      const baseCalculation = (laborRevenue * revenuePercentage) / teamSize;
+      
+      // Training bonus: $4/hour if isTraining = true
+      const trainingBonus = assignment.assignment.isTraining ? 
+        (hoursWorked * parseFloat(p4pConfig.trainingBonusPerHour || '4')) : 0;
+      
+      // Large job bonus: $1.50/budgeted hour for 49+ hour jobs
+      const largejobBonus = budgetedHours >= parseFloat(p4pConfig.largejobBonusThreshold?.toString() || '49') ?
+        (budgetedHours * parseFloat(p4pConfig.largejobBonusPerHour || '1.5')) / teamSize : 0;
+      
+      // Seasonal bonus: March-May gets 40% instead of 33%
+      const currentMonth = new Date().getMonth() + 1; // 1-12
+      const isSeasonalPeriod = currentMonth >= 3 && currentMonth <= 5; // March-May
+      const seasonalBonus = isSeasonalPeriod && assignment.job.isSeasonalBonus ? 
+        (laborRevenue * 0.07) / teamSize : 0; // 7% additional (40% - 33%)
+      
+      // Total P4P before minimum wage check
+      let totalP4P = baseCalculation + trainingBonus + largejobBonus + seasonalBonus;
+      
+      // Minimum wage protection: $18/hour minimum (or config minimum)
+      const minimumHourly = parseFloat(p4pConfig.minimumHourlyRate || '18');
+      const minimumPay = hoursWorked * minimumHourly;
+      const minimumWageGap = Math.max(0, minimumPay - totalP4P);
+      
+      // Final P4P amount (minimum wage is handled separately in payroll)
+      const finalP4P = totalP4P;
+      const hourlyEquivalent = finalP4P / hoursWorked;
+
+      return {
+        assignmentId,
+        performancePay: finalP4P,
+        hourlyEquivalent,
+        details: {
+          laborRevenue,
+          revenuePercentage: revenuePercentage * 100,
+          teamSize,
+          hoursWorked,
+          baseCalculation,
+          trainingBonus,
+          largejobBonus,
+          seasonalBonus,
+          minimumWageGap
+        }
+      };
+
+    } catch (error) {
+      console.error(`Error calculating P4P for assignment ${assignmentId}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Calculate P4P for all assignments on a completed job
+   */
+  static async calculateP4PForJob(jobId: string): Promise<P4PCalculationResult[]> {
+    try {
+      // Get all assignments for this job
+      const assignments = await db
+        .select()
+        .from(jobAssignments)
+        .where(eq(jobAssignments.jobId, jobId));
+
+      const results: P4PCalculationResult[] = [];
+
+      for (const assignment of assignments) {
+        const result = await this.calculateP4PForAssignment(assignment.id);
+        if (result) {
+          results.push(result);
+          
+          // Update the assignment with calculated P4P
+          await db
+            .update(jobAssignments)
+            .set({ 
+              performancePay: result.performancePay.toString()
+            })
+            .where(eq(jobAssignments.id, assignment.id));
+        }
+      }
+
+      return results;
+    } catch (error) {
+      console.error(`Error calculating P4P for job ${jobId}:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Recalculate P4P for all completed jobs
+   */
+  static async recalculateAllP4P(): Promise<void> {
+    try {
+      console.log('Starting P4P recalculation for all completed jobs...');
+      
+      // Get all completed jobs
+      const completedJobs = await db
+        .select()
+        .from(jobs)
+        .where(eq(jobs.status, 'completed'));
+
+      console.log(`Found ${completedJobs.length} completed jobs`);
+      
+      let totalCalculations = 0;
+      
+      for (const job of completedJobs) {
+        const results = await this.calculateP4PForJob(job.id);
+        totalCalculations += results.length;
+        
+        console.log(`Calculated P4P for job ${job.customerName}: ${results.length} assignments`);
+        results.forEach(result => {
+          console.log(`  - Assignment ${result.assignmentId}: $${result.performancePay.toFixed(2)} (${result.hourlyEquivalent.toFixed(2)}/hr)`);
+        });
+      }
+      
+      console.log(`P4P recalculation complete: ${totalCalculations} assignments processed`);
+      
+    } catch (error) {
+      console.error('Error in P4P recalculation:', error);
+      throw error;
+    }
+  }
+}
