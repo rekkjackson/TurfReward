@@ -43,6 +43,8 @@ export interface IStorage {
   getJob(id: string): Promise<Job | undefined>;
   createJob(job: InsertJob): Promise<Job>;
   updateJob(id: string, job: Partial<InsertJob>): Promise<Job>;
+  deleteJob(id: string): Promise<boolean>;
+  getAllJobs(): Promise<Job[]>;
 
   // Job Assignment methods
   getJobAssignments(): Promise<(JobAssignment & { employee: Employee; job: Job })[]>;
@@ -403,6 +405,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(jobs.id, id))
       .returning();
     return job || null;
+  }
+
+  async deleteJob(id: string): Promise<boolean> {
+    try {
+      // First delete related job assignments
+      await db.delete(jobAssignments).where(eq(jobAssignments.jobId, id));
+      
+      // Then delete the job
+      const result = await db.delete(jobs).where(eq(jobs.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      return false;
+    }
+  }
+
+  async getAllJobs(): Promise<Job[]> {
+    return await db.select().from(jobs).orderBy(desc(jobs.createdAt));
   }
 }
 

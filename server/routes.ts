@@ -239,7 +239,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Enhanced job routes for project tracking
+  // Job routes for project tracking
+  app.get("/api/jobs", async (req, res) => {
+    try {
+      const jobs = await storage.getAllJobs();
+      res.json(jobs);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+      res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
+
+  app.post("/api/jobs", async (req, res) => {
+    try {
+      const result = insertJobSchema.safeParse(req.body);
+      if (!result.success) {
+        console.error('Validation errors:', result.error.errors);
+        return res.status(400).json({ 
+          message: "Invalid job data", 
+          errors: result.error.errors 
+        });
+      }
+      const job = await storage.createJob(result.data);
+      res.status(201).json(job);
+    } catch (error) {
+      console.error('Error creating job:', error);
+      res.status(500).json({ message: "Failed to create job" });
+    }
+  });
+
   app.patch("/api/jobs/:id", async (req, res) => {
     try {
       const job = await storage.updateJob(req.params.id, req.body);
@@ -248,7 +276,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(job);
     } catch (error) {
+      console.error('Error updating job:', error);
       res.status(500).json({ message: "Failed to update job" });
+    }
+  });
+
+  app.delete("/api/jobs/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteJob(id);
+      if (!success) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      res.json({ message: "Job deleted successfully" });
+    } catch (error) {
+      console.error('Delete job error:', error);
+      res.status(500).json({ message: "Failed to delete job" });
     }
   });
 

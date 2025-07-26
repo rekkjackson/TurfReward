@@ -29,7 +29,9 @@ import {
   Pause,
   Play,
   Edit,
-  Eye
+  Eye,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -73,31 +75,56 @@ export function ProjectTracking() {
     mutationFn: (data: any) => apiRequest('POST', '/api/jobs', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
-      toast({ title: 'Success', description: 'Job created successfully' });
-      form.reset();
+      toast({
+        title: "Job Created",
+        description: "Job has been successfully created.",
+      });
       setDialogOpen(false);
+      form.reset();
     },
     onError: (error: any) => {
-      console.error('Job creation error:', error);
-      toast({ 
-        title: 'Error', 
-        description: error?.response?.data?.error || 'Failed to create job', 
-        variant: 'destructive' 
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create job",
+        variant: "destructive",
       });
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => 
-      apiRequest('PATCH', `/api/jobs/${id}`, data),
+  const deleteMutation = useMutation({
+    mutationFn: (jobId: string) => apiRequest('DELETE', `/api/jobs/${jobId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
-      toast({ title: 'Success', description: 'Job updated successfully' });
+      toast({
+        title: "Job Deleted",
+        description: "Job has been successfully deleted.",
+      });
     },
-    onError: () => {
-      toast({ title: 'Error', description: 'Failed to update job', variant: 'destructive' });
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete job",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ jobId, status }: { jobId: string; status: string }) => 
+      apiRequest('PATCH', `/api/jobs/${jobId}`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
+      toast({
+        title: "Job Status Updated",
+        description: "Job status has been successfully updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update job status",
+        variant: "destructive",
+      });
     },
   });
 
@@ -514,6 +541,87 @@ export function ProjectTracking() {
                           <p className="text-sm text-gray-700">{job.notes}</p>
                         </div>
                       )}
+                      
+                      {/* Action buttons */}
+                      <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-200">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateStatusMutation.mutate({ 
+                              jobId: job.id, 
+                              status: job.status === 'completed' ? 'pending' : 'completed' 
+                            })}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            {job.status === 'completed' ? (
+                              <>
+                                <Pause className="w-3 h-3 mr-1" />
+                                Reopen
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Complete
+                              </>
+                            )}
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedJob(job);
+                              // Could open edit dialog here
+                            }}
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Edit
+                          </Button>
+                        </div>
+                        
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Delete
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center space-x-2">
+                                <AlertTriangle className="w-5 h-5 text-red-500" />
+                                <span>Delete Job</span>
+                              </DialogTitle>
+                              <DialogDescription>
+                                Are you sure you want to delete this job? This action cannot be undone.
+                                <br /><br />
+                                <strong>Job:</strong> {job.jobNumber || job.id.slice(0, 8)} - {job.customerName}
+                                <br />
+                                <strong>Type:</strong> {job.jobType} ({job.category.replace('_', ' ')})
+                                <br />
+                                <strong>Value:</strong> ${Number(job.totalJobValue || 0).toLocaleString()}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex justify-end space-x-2">
+                              <DialogTrigger asChild>
+                                <Button variant="outline">Cancel</Button>
+                              </DialogTrigger>
+                              <Button
+                                variant="destructive"
+                                onClick={() => deleteMutation.mutate(job.id)}
+                                disabled={deleteMutation.isPending}
+                              >
+                                {deleteMutation.isPending ? 'Deleting...' : 'Delete Job'}
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
