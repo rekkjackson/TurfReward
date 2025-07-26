@@ -465,7 +465,7 @@ export class DatabaseStorage implements IStorage {
       
       // Then delete the job
       const result = await db.delete(jobs).where(eq(jobs.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount || 0) > 0;
     } catch (error) {
       console.error('Error deleting job:', error);
       return false;
