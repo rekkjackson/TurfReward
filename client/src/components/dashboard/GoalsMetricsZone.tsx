@@ -32,7 +32,7 @@ export function GoalsMetricsZone({
   };
 
   return (
-    <div className="col-span-12 row-span-1 grid grid-cols-4 gap-4">
+    <div className="h-full grid grid-cols-4 gap-4">
       {/* Weekly Revenue Goal */}
       <motion.div
         className="bg-slate-medium rounded-lg p-4"

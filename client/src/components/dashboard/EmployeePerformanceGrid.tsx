@@ -65,7 +65,7 @@ const getDefaultPhoto = () => "https://images.unsplash.com/photo-1472099645785-5
 export function EmployeePerformanceGrid({ employees }: EmployeePerformanceGridProps) {
   if (!employees || employees.length === 0) {
     return (
-      <div className="col-span-3 row-span-3 bg-slate-medium rounded-lg p-6">
+      <div className="h-full bg-slate-medium rounded-lg p-6">
         <h2 className="text-xl font-bold mb-4 text-center">Team Performance Overview</h2>
         <div className="flex items-center justify-center h-full text-gray-400">
           <div className="text-center">
@@ -78,7 +78,7 @@ export function EmployeePerformanceGrid({ employees }: EmployeePerformanceGridPr
   }
 
   return (
-    <div className="col-span-3 row-span-3 bg-slate-medium rounded-lg p-6">
+    <div className="h-full bg-slate-medium rounded-lg p-6">
       <h2 className="text-xl font-bold mb-4 text-center">Team Performance Overview</h2>
       
       <div className="grid grid-cols-1 gap-3">

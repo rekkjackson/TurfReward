@@ -14,7 +14,7 @@ interface TopPerformerSpotlightProps {
 export function TopPerformerSpotlight({ performer }: TopPerformerSpotlightProps) {
   if (!performer) {
     return (
-      <div className="col-span-4 row-span-3 bg-slate-medium rounded-lg p-6">
+      <div className="h-full bg-slate-medium rounded-lg p-6">
         <h2 className="text-xl font-bold mb-4 text-center">Top Performer Spotlight</h2>
         <div className="flex items-center justify-center h-full text-gray-400">
           <div className="text-center">
@@ -29,7 +29,7 @@ export function TopPerformerSpotlight({ performer }: TopPerformerSpotlightProps)
   const defaultPhoto = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150";
 
   return (
-    <div className="col-span-4 row-span-3 bg-slate-medium rounded-lg p-6">
+    <div className="h-full bg-slate-medium rounded-lg p-6">
       <h2 className="text-xl font-bold mb-4 text-center">Top Performer Spotlight</h2>
       
       {/* Top Performer Card */}

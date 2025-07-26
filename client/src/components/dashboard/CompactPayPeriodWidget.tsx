@@ -27,7 +27,7 @@ export function CompactPayPeriodWidget() {
   };
 
   return (
-    <div className="col-span-4 row-span-2 bg-slate-medium rounded-lg p-4">
+    <div className="h-full bg-slate-medium rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
         <Calendar className="w-4 h-4 text-primary" />
         <span className="text-sm font-medium text-white">Pay Period Progress</span>

@@ -31,7 +31,7 @@ export function DashboardHeader({ weatherCondition = "Sunny", weatherTemperature
   }, []);
 
   return (
-    <div className="col-span-12 row-span-1 bg-slate-medium rounded-lg p-4 flex justify-between items-center">
+    <div className="bg-slate-medium rounded-lg p-4 flex justify-between items-center">
       <div className="flex items-center space-x-4">
         <Leaf className="text-success text-3xl" />
         <div>

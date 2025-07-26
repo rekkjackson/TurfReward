@@ -86,56 +86,82 @@ export default function Dashboard() {
         </Link>
       </div>
       
-      <div className="h-screen p-4 grid grid-cols-12 grid-rows-8 gap-4">
-        {/* Row 1: Header - spans full width */}
-        <DashboardHeader
-          weatherCondition={todayMetrics?.weatherCondition}
-          weatherTemperature={todayMetrics?.weatherTemperature}
-        />
+      <div className="h-screen p-4 flex flex-col gap-4">
+        {/* Header Section */}
+        <div className="flex-shrink-0">
+          <DashboardHeader
+            weatherCondition={todayMetrics?.weatherCondition}
+            weatherTemperature={todayMetrics?.weatherTemperature}
+          />
+        </div>
 
-        {/* Row 2-3: Main metrics section */}
-        <RevenueThermometer
-          current={Number(todayMetrics?.dailyRevenue || 0)}
-          goal={Number(todayMetrics?.dailyRevenueGoal || 6500)}
-        />
+        {/* Main Content Grid */}
+        <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
+          {/* Left Column - Revenue */}
+          <div className="col-span-3">
+            <RevenueThermometer
+              current={Number(todayMetrics?.dailyRevenue || 0)}
+              goal={Number(todayMetrics?.dailyRevenueGoal || 6500)}
+            />
+          </div>
 
-        <JobCounters
-          mowingCompleted={todayMetrics?.mowingJobsCompleted || 0}
-          landscapingCompleted={todayMetrics?.landscapingJobsCompleted || 0}
-          dailyGoalProgress={Math.round(
-            ((todayMetrics?.mowingJobsCompleted || 0) + (todayMetrics?.landscapingJobsCompleted || 0)) / 30 * 100
-          )}
-        />
+          {/* Middle Columns - Job Metrics */}
+          <div className="col-span-6 grid grid-rows-3 gap-4">
+            {/* Top Row - Job Counters and Efficiency */}
+            <div className="row-span-1 grid grid-cols-2 gap-4">
+              <JobCounters
+                mowingCompleted={todayMetrics?.mowingJobsCompleted || 0}
+                landscapingCompleted={todayMetrics?.landscapingJobsCompleted || 0}
+                dailyGoalProgress={Math.round(
+                  ((todayMetrics?.mowingJobsCompleted || 0) + (todayMetrics?.landscapingJobsCompleted || 0)) / 30 * 100
+                )}
+              />
+              <EfficiencyOverview
+                mowingAverage={Number(todayMetrics?.mowingAverageEfficiency || 0)}
+                overallEfficiency={Number(todayMetrics?.overallEfficiency || 0)}
+                qualityScore={Number(todayMetrics?.averageQualityScore || 5.0)}
+              />
+            </div>
 
-        <EfficiencyOverview
-          mowingAverage={Number(todayMetrics?.mowingAverageEfficiency || 0)}
-          overallEfficiency={Number(todayMetrics?.overallEfficiency || 0)}
-          qualityScore={Number(todayMetrics?.averageQualityScore || 5.0)}
-        />
+            {/* Middle Row - Performance Grid */}
+            <div className="row-span-1">
+              <EmployeePerformanceGrid employees={employeePerformance} />
+            </div>
 
-        {/* Row 4-6: Performance section */}
-        <TopPerformerSpotlight performer={topPerformer} />
+            {/* Bottom Row - Goals and Metrics */}
+            <div className="row-span-1">
+              <GoalsMetricsZone
+                weeklyRevenue={weeklyRevenue}
+                yellowSlipCount={yellowSlipCount}
+                customerSatisfaction={customerSatisfaction}
+              />
+            </div>
+          </div>
 
-        <EmployeePerformanceGrid employees={employeePerformance} />
+          {/* Right Column - Performance and Tracking */}
+          <div className="col-span-3 grid grid-rows-3 gap-4">
+            {/* Top Performer */}
+            <div className="row-span-1">
+              <TopPerformerSpotlight performer={topPerformer} />
+            </div>
 
-        {/* Row 4-5: Pay Period tracking */}
-        <CompactPayPeriodWidget />
+            {/* Pay Period Widget */}
+            <div className="row-span-1">
+              <CompactPayPeriodWidget />
+            </div>
 
-        {/* Row 6-7: Bottom section */}
-        <DamageCasesTracker
-          yellowSlipCount={damageCases.yellowSlipCount}
-          propertyCasualties={damageCases.propertyCasualties}
-          equipmentDamage={damageCases.equipmentDamage}
-          totalCost={damageCases.totalCost}
-          weeklyTrend={damageCases.weeklyTrend}
-        />
-
-        {/* Row 8: Goals footer */}
-        <GoalsMetricsZone
-          weeklyRevenue={weeklyRevenue}
-          yellowSlipCount={yellowSlipCount}
-          customerSatisfaction={customerSatisfaction}
-        />
+            {/* Damage Cases */}
+            <div className="row-span-1">
+              <DamageCasesTracker
+                yellowSlipCount={damageCases.yellowSlipCount}
+                propertyCasualties={damageCases.propertyCasualties}
+                equipmentDamage={damageCases.equipmentDamage}
+                totalCost={damageCases.totalCost}
+                weeklyTrend={damageCases.weeklyTrend}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

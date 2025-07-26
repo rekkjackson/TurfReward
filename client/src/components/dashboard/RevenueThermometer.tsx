@@ -10,7 +10,7 @@ export function RevenueThermometer({ current, goal }: RevenueThermometerProps) {
   const remaining = Math.max(0, goal - current);
 
   return (
-    <div className="col-span-3 row-span-4 bg-slate-medium rounded-lg p-6">
+    <div className="h-full bg-slate-medium rounded-lg p-6 flex flex-col">
       <div className="text-center mb-4">
         <h2 className="text-xl font-bold mb-2">Daily Revenue</h2>
         <div className="text-3xl font-black metric-number">
@@ -22,10 +22,10 @@ export function RevenueThermometer({ current, goal }: RevenueThermometerProps) {
       </div>
       
       {/* Thermometer Visual */}
-      <div className="flex justify-center">
+      <div className="flex-1 flex justify-center items-center">
         <div className="relative">
           {/* Thermometer Container */}
-          <div className="w-16 h-64 bg-slate-light rounded-full relative overflow-hidden">
+          <div className="w-16 h-48 bg-slate-light rounded-full relative overflow-hidden">
             {/* Fill Level */}
             <motion.div 
               className="absolute bottom-0 w-full rounded-full thermometer-fill"

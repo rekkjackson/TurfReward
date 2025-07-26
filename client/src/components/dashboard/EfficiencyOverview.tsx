@@ -33,7 +33,7 @@ export function EfficiencyOverview({
   };
 
   return (
-    <div className="col-span-5 row-span-2 bg-slate-medium rounded-lg p-6">
+    <div className="h-full bg-slate-medium rounded-lg p-6">
       <h2 className="text-xl font-bold mb-4 text-center">Company-Wide Efficiency</h2>
       <div className="grid grid-cols-3 gap-4">
         {/* Mowing Efficiency */}
