@@ -337,11 +337,16 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(companyMetrics.date))
       .limit(1);
 
-    // If no metrics for today, create base metrics with real job counts
+    // Calculate real revenue from completed jobs
+    const completedJobs = await this.getJobs(100);
+    const completedJobsFiltered = completedJobs.filter(job => job.status === 'completed');
+    const dailyRevenue = completedJobsFiltered.reduce((sum, job) => sum + parseFloat(job.laborRevenue || '0'), 0);
+    
+    // If no metrics for today, create base metrics with real data
     const effectiveMetrics = todayMetrics || {
-      id: 'default-metrics',
+      id: 'live-dashboard-data',
       date: today,
-      dailyRevenue: 0,
+      dailyRevenue,
       dailyRevenueGoal: 6500,
       mowingJobsCompleted: Number(mowingJobsToday?.count || 0),
       landscapingJobsCompleted: Number(landscapingJobsToday?.count || 0),
@@ -354,9 +359,11 @@ export class DatabaseStorage implements IStorage {
       updatedAt: today,
     };
 
-    // Always update with real-time job counts
+    // Always update with real-time job counts and revenue
     effectiveMetrics.mowingJobsCompleted = Number(mowingJobsToday?.count || 0);
     effectiveMetrics.landscapingJobsCompleted = Number(landscapingJobsToday?.count || 0);
+    effectiveMetrics.dailyRevenue = dailyRevenue;
+    effectiveMetrics.id = 'live-calculated';
 
     // Get week start for weekly calculations
     const weekStart = new Date(today);
