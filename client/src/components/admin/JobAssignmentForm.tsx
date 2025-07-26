@@ -20,27 +20,25 @@ export function JobAssignmentForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: jobs = [] } = useQuery({
+  const { data: jobs = [] } = useQuery<Job[]>({
     queryKey: ['/api/jobs'],
   });
 
-  const { data: employees = [] } = useQuery({
+  const { data: employees = [] } = useQuery<Employee[]>({
     queryKey: ['/api/employees'],
   });
 
-  const { data: assignments = [] } = useQuery({
+  const { data: assignments = [] } = useQuery<JobAssignment[]>({
     queryKey: ['/api/job-assignments'],
   });
 
   const form = useForm({
-    resolver: zodResolver(insertJobAssignmentSchema),
+    resolver: zodResolver(insertJobAssignmentSchema.omit({ jobId: true })),
     defaultValues: {
-      jobId: '',
       employeeId: '',
-      hoursWorked: '0.00',
+      hoursWorked: '8.00',
       isLeader: false,
       isTraining: false,
-      performancePay: '0.00',
     },
   });
 
@@ -50,9 +48,12 @@ export function JobAssignmentForm() {
       queryClient.invalidateQueries({ queryKey: ['/api/job-assignments'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
       toast({ title: 'Success', description: 'Job assignment created successfully' });
-      form.reset();
-      // Keep the job selected for easier multiple assignments
-      form.setValue('jobId', selectedJobId);
+      form.reset({
+        employeeId: '',
+        hoursWorked: '8.00',
+        isLeader: false,
+        isTraining: false,
+      });
     },
     onError: (error: any) => {
       console.error('Job assignment error:', error);
@@ -143,9 +144,9 @@ export function JobAssignmentForm() {
     deleteMutation.mutate(assignmentId);
   };
 
-  const activeJobs = jobs.filter((job: any) => ['pending', 'in_progress'].includes(job.status));
-  const selectedJob = jobs.find((job: any) => job.id === selectedJobId);
-  const jobAssignments = assignments.filter((assignment: any) => 
+  const activeJobs = jobs.filter((job) => ['pending', 'in_progress'].includes(job.status));
+  const selectedJob = jobs.find((job) => job.id === selectedJobId);
+  const jobAssignments = assignments.filter((assignment) => 
     assignment.jobId === selectedJobId
   );
 
@@ -172,7 +173,7 @@ export function JobAssignmentForm() {
               <SelectValue placeholder="Choose a job to assign workers to" />
             </SelectTrigger>
             <SelectContent>
-              {activeJobs.map((job: any) => (
+              {activeJobs.map((job) => (
                 <SelectItem key={job.id} value={job.id}>
                   {job.jobNumber || job.id.slice(0, 8)} - {job.customerName} ({job.jobType})
                 </SelectItem>
@@ -238,7 +239,6 @@ export function JobAssignmentForm() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <input type="hidden" value={selectedJobId} {...form.register('jobId')} />
                   
                   <FormField
                     control={form.control}
@@ -253,7 +253,7 @@ export function JobAssignmentForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {employees.map((employee: any) => (
+                            {employees.map((employee) => (
                               <SelectItem key={employee.id} value={employee.id}>
                                 {employee.name} - {employee.position}
                               </SelectItem>
@@ -347,7 +347,7 @@ export function JobAssignmentForm() {
                   size="sm"
                   variant="outline"
                   onClick={() => {
-                    const totalHours = jobAssignments.reduce((sum, assignment) => 
+                    const totalHours = jobAssignments.reduce((sum: number, assignment) => 
                       sum + parseFloat(assignment.hoursWorked || '0'), 0
                     );
                     completeJob(selectedJobId, totalHours);
@@ -361,8 +361,8 @@ export function JobAssignmentForm() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {jobAssignments.map((assignment: any) => {
-                const employee = employees?.find((emp: Employee) => emp.id === assignment.employeeId);
+              {jobAssignments.map((assignment) => {
+                const employee = employees.find((emp) => emp.id === assignment.employeeId);
                 const calculatedPay = calculatePerformancePay(selectedJob, assignment);
                 
                 return (
@@ -374,10 +374,10 @@ export function JobAssignmentForm() {
                           <Clock className="w-3 h-3" />
                           <span>{assignment.hoursWorked}h worked</span>
                           {assignment.isLeader && (
-                            <Badge variant="outline" size="sm">Leader</Badge>
+                            <Badge variant="outline">Leader</Badge>
                           )}
                           {assignment.isTraining && (
-                            <Badge variant="outline" size="sm">Training +$4/h</Badge>
+                            <Badge variant="outline">Training +$4/h</Badge>
                           )}
                         </div>
                       </div>
@@ -403,10 +403,10 @@ export function JobAssignmentForm() {
               
               <div className="border-t pt-3 mt-3">
                 <div className="flex items-center justify-between font-semibold">
-                  <span>Total Hours: {jobAssignments.reduce((sum, assignment) => 
+                  <span>Total Hours: {jobAssignments.reduce((sum: number, assignment) => 
                     sum + parseFloat(assignment.hoursWorked || '0'), 0
                   )}h</span>
-                  <span>Total Pay: ${jobAssignments.reduce((sum, assignment) => 
+                  <span>Total Pay: ${jobAssignments.reduce((sum: number, assignment) => 
                     sum + calculatePerformancePay(selectedJob, assignment), 0
                   ).toFixed(2)}</span>
                 </div>
@@ -414,7 +414,7 @@ export function JobAssignmentForm() {
                   Budgeted: {selectedJob.budgetedHours}h | 
                   Efficiency: {(
                     parseFloat(selectedJob.budgetedHours) / 
-                    jobAssignments.reduce((sum, assignment) => sum + parseFloat(assignment.hoursWorked || '0'), 0) * 100
+                    jobAssignments.reduce((sum: number, assignment) => sum + parseFloat(assignment.hoursWorked || '0'), 0) * 100
                   ).toFixed(1)}%
                 </div>
               </div>
