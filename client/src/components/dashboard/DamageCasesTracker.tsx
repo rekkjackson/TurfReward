@@ -29,7 +29,7 @@ export function DamageCasesTracker({
   };
 
   return (
-    <div className="col-span-3 row-span-2 bg-slate-medium rounded-lg p-6">
+    <div className="col-span-5 row-span-2 bg-slate-medium rounded-lg p-6">
       <h2 className="text-xl font-bold mb-4 text-center">Damage Cases & Quality Issues</h2>
       
       {/* Traffic Light Status */}

@@ -8,6 +8,7 @@ import { EmployeePerformanceGrid } from '@/components/dashboard/EmployeePerforma
 import { GoalsMetricsZone } from '@/components/dashboard/GoalsMetricsZone';
 import { DamageCasesTracker } from '@/components/dashboard/DamageCasesTracker';
 import { PayPeriodVisualization } from '@/components/dashboard/PayPeriodVisualization';
+import { CompactPayPeriodWidget } from '@/components/dashboard/CompactPayPeriodWidget';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Loader2, WifiOff, Settings } from 'lucide-react';
 import { Link } from 'wouter';
@@ -86,11 +87,13 @@ export default function Dashboard() {
       </div>
       
       <div className="h-screen p-4 grid grid-cols-12 grid-rows-8 gap-4">
+        {/* Row 1: Header - spans full width */}
         <DashboardHeader
           weatherCondition={todayMetrics?.weatherCondition}
           weatherTemperature={todayMetrics?.weatherTemperature}
         />
 
+        {/* Row 2-3: Main metrics section */}
         <RevenueThermometer
           current={Number(todayMetrics?.dailyRevenue || 0)}
           goal={Number(todayMetrics?.dailyRevenueGoal || 6500)}
@@ -110,13 +113,15 @@ export default function Dashboard() {
           qualityScore={Number(todayMetrics?.averageQualityScore || 5.0)}
         />
 
+        {/* Row 4-6: Performance section */}
         <TopPerformerSpotlight performer={topPerformer} />
 
         <EmployeePerformanceGrid employees={employeePerformance} />
 
-        {/* Interactive Pay Period Visualization */}
-        <PayPeriodVisualization className="col-span-5 row-span-2" />
+        {/* Row 4-5: Pay Period tracking */}
+        <CompactPayPeriodWidget />
 
+        {/* Row 6-7: Bottom section */}
         <DamageCasesTracker
           yellowSlipCount={damageCases.yellowSlipCount}
           propertyCasualties={damageCases.propertyCasualties}
@@ -125,6 +130,7 @@ export default function Dashboard() {
           weeklyTrend={damageCases.weeklyTrend}
         />
 
+        {/* Row 8: Goals footer */}
         <GoalsMetricsZone
           weeklyRevenue={weeklyRevenue}
           yellowSlipCount={yellowSlipCount}
