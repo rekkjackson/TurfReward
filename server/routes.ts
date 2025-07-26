@@ -339,17 +339,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/jobs/:id", async (req, res) => {
     try {
-      // Fix timestamp fields - ensure they're Date objects
+      // Fix timestamp fields - ensure they're Date objects or remove invalid timestamps
       const updateData = { ...req.body };
-      if (updateData.completedAt && typeof updateData.completedAt === 'string') {
-        updateData.completedAt = new Date(updateData.completedAt);
+      
+      // Handle completedAt - set to current time if status is completed
+      if (updateData.status === 'completed' && !updateData.completedAt) {
+        updateData.completedAt = new Date();
+      } else if (updateData.completedAt && typeof updateData.completedAt === 'string') {
+        try {
+          updateData.completedAt = new Date(updateData.completedAt);
+          // Validate the date
+          if (isNaN(updateData.completedAt.getTime())) {
+            updateData.completedAt = new Date();
+          }
+        } catch (error) {
+          updateData.completedAt = new Date();
+        }
       }
-      if (updateData.createdAt && typeof updateData.createdAt === 'string') {
-        updateData.createdAt = new Date(updateData.createdAt);
-      }
-      if (updateData.updatedAt && typeof updateData.updatedAt === 'string') {
-        updateData.updatedAt = new Date(updateData.updatedAt);
-      }
+      
+      // Remove other timestamp fields from updates (let DB handle them)
+      delete updateData.createdAt;
+      delete updateData.updatedAt;
       
       const job = await storage.updateJob(req.params.id, updateData);
       if (!job) {
