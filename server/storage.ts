@@ -154,9 +154,19 @@ export class DatabaseStorage implements IStorage {
 
   async updateJob(id: string, updateData: Partial<InsertJob>): Promise<Job | null> {
     try {
+      // Handle timestamp conversion for completedAt
+      const cleanedData = { ...updateData };
+      if (cleanedData.completedAt) {
+        if (typeof cleanedData.completedAt === 'string') {
+          cleanedData.completedAt = new Date(cleanedData.completedAt);
+        } else if (!(cleanedData.completedAt instanceof Date)) {
+          cleanedData.completedAt = new Date();
+        }
+      }
+      
       const [updatedJob] = await db
         .update(jobs)
-        .set({ ...updateData, updatedAt: new Date() })
+        .set({ ...cleanedData, updatedAt: new Date() })
         .where(eq(jobs.id, id))
         .returning();
       return updatedJob || null;
