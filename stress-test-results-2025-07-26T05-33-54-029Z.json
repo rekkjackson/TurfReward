@@ -1,0 +1,93 @@
+{
+  "timestamp": "2025-07-26T05:33:54.035Z",
+  "config": {
+    "iterations": 2000,
+    "concurrency": 10,
+    "endpointCount": 7
+  },
+  "results": [
+    {
+      "testName": "GET /api/dashboard",
+      "iterations": 2000,
+      "totalTime": 33272.558927000005,
+      "averageTime": 159.17303634849955,
+      "minTime": 146.27333700000054,
+      "maxTime": 271.8034140000001,
+      "successCount": 2000,
+      "errorCount": 0,
+      "throughput": 60.10959374624597
+    },
+    {
+      "testName": "GET /api/jobs",
+      "iterations": 2000,
+      "totalTime": 6236.066335000003,
+      "averageTime": 26.871406978499937,
+      "minTime": 21.47258999999758,
+      "maxTime": 46.49608900000021,
+      "successCount": 2000,
+      "errorCount": 0,
+      "throughput": 320.7149976540458
+    },
+    {
+      "testName": "GET /api/employees",
+      "iterations": 2000,
+      "totalTime": 5727.060534000004,
+      "averageTime": 24.938131801499917,
+      "minTime": 20.891499999997905,
+      "maxTime": 36.58433900000091,
+      "successCount": 2000,
+      "errorCount": 0,
+      "throughput": 349.21928764792045
+    },
+    {
+      "testName": "GET /api/pay-period/current",
+      "iterations": 2000,
+      "totalTime": 1837.3376830000052,
+      "averageTime": 5.179292004999988,
+      "minTime": 1.125240000001213,
+      "maxTime": 27.582548999998835,
+      "successCount": 2000,
+      "errorCount": 0,
+      "throughput": 1088.53153043397
+    },
+    {
+      "testName": "POST /api/jobs",
+      "iterations": 2000,
+      "totalTime": 7733.815811,
+      "averageTime": 35.00306994599978,
+      "minTime": 24.050920000001497,
+      "maxTime": 93.96314800000255,
+      "successCount": 2000,
+      "errorCount": 0,
+      "throughput": 258.60455548415695
+    },
+    {
+      "testName": "GET /api/performance-metrics",
+      "iterations": 2000,
+      "totalTime": 24288.705168999993,
+      "averageTime": 114.28969543999978,
+      "minTime": 23.187409000005573,
+      "maxTime": 178.86339599999337,
+      "successCount": 0,
+      "errorCount": 2000,
+      "throughput": 0
+    },
+    {
+      "testName": "GET /api/company-metrics",
+      "iterations": 2000,
+      "totalTime": 5588.361990000005,
+      "averageTime": 24.695632292999907,
+      "minTime": 20.691210000004503,
+      "maxTime": 121.12959699999192,
+      "successCount": 2000,
+      "errorCount": 0,
+      "throughput": 357.8866228742634
+    }
+  ],
+  "summary": {
+    "totalRequests": 14000,
+    "totalSuccesses": 12000,
+    "totalErrors": 2000,
+    "overallSuccessRate": 85.71428571428571
+  }
+}

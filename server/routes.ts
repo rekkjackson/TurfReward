@@ -261,6 +261,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       const job = await storage.createJob(result.data);
+      
+      // Broadcast dashboard update after job creation
+      try {
+        const dashboardData = await storage.getDashboardData();
+        broadcastUpdate({ type: 'dashboard_update', data: dashboardData });
+      } catch (broadcastError) {
+        console.error('Failed to broadcast dashboard update after job creation:', broadcastError);
+      }
+      
       res.status(201).json(job);
     } catch (error) {
       console.error('Error creating job:', error);
@@ -274,6 +283,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
+      
+      // Broadcast dashboard update after job update
+      try {
+        const dashboardData = await storage.getDashboardData();
+        broadcastUpdate({ type: 'dashboard_update', data: dashboardData });
+      } catch (broadcastError) {
+        console.error('Failed to broadcast dashboard update after job update:', broadcastError);
+      }
+      
       res.json(job);
     } catch (error) {
       console.error('Error updating job:', error);
@@ -288,6 +306,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!success) {
         return res.status(404).json({ message: "Job not found" });
       }
+      
+      // Broadcast dashboard update after job deletion
+      try {
+        const dashboardData = await storage.getDashboardData();
+        broadcastUpdate({ type: 'dashboard_update', data: dashboardData });
+      } catch (broadcastError) {
+        console.error('Failed to broadcast dashboard update after job deletion:', broadcastError);
+      }
+      
       res.json({ message: "Job deleted successfully" });
     } catch (error) {
       console.error('Delete job error:', error);
