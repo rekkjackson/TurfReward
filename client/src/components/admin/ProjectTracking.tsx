@@ -37,6 +37,7 @@ import { motion } from 'framer-motion';
 
 export function ProjectTracking() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const { toast } = useToast();
@@ -91,10 +92,56 @@ export function ProjectTracking() {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (jobId: string) => apiRequest('DELETE', `/api/jobs/${jobId}`),
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
+      apiRequest('PATCH', `/api/jobs/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
+      toast({
+        title: "Job Updated",
+        description: "Job has been successfully updated.",
+      });
+      setEditDialogOpen(false);
+      setSelectedJob(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update job",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ jobId, status }: { jobId: string; status: string }) => 
+      apiRequest('PATCH', `/api/jobs/${jobId}`, { 
+        status,
+        ...(status === 'completed' ? { completedAt: new Date().toISOString() } : {})
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
+      toast({
+        title: "Status Updated",
+        description: "Job status has been updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update status",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiRequest('DELETE', `/api/jobs/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
       toast({
         title: "Job Deleted",
         description: "Job has been successfully deleted.",
@@ -109,24 +156,7 @@ export function ProjectTracking() {
     },
   });
 
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ jobId, status }: { jobId: string; status: string }) => 
-      apiRequest('PATCH', `/api/jobs/${jobId}`, { status }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
-      toast({
-        title: "Job Status Updated",
-        description: "Job status has been successfully updated.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update job status",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const onSubmit = (data: any) => {
     console.log('Form data before processing:', data);
@@ -572,7 +602,7 @@ export function ProjectTracking() {
                             size="sm"
                             onClick={() => {
                               setSelectedJob(job);
-                              // Could open edit dialog here
+                              setEditDialogOpen(true);
                             }}
                           >
                             <Edit className="w-3 h-3 mr-1" />
