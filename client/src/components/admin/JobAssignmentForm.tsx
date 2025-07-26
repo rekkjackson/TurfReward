@@ -20,15 +20,15 @@ export function JobAssignmentForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: jobs } = useQuery({
+  const { data: jobs = [] } = useQuery({
     queryKey: ['/api/jobs'],
   });
 
-  const { data: employees } = useQuery({
+  const { data: employees = [] } = useQuery({
     queryKey: ['/api/employees'],
   });
 
-  const { data: assignments } = useQuery({
+  const { data: assignments = [] } = useQuery({
     queryKey: ['/api/job-assignments'],
   });
 
@@ -110,9 +110,9 @@ export function JobAssignmentForm() {
     });
   };
 
-  const activeJobs = jobs?.filter((job: Job) => ['pending', 'in_progress'].includes(job.status));
-  const selectedJob = jobs?.find((job: Job) => job.id === selectedJobId);
-  const jobAssignments = assignments?.filter((assignment: JobAssignment) => 
+  const activeJobs = jobs.filter((job: any) => ['pending', 'in_progress'].includes(job.status));
+  const selectedJob = jobs.find((job: any) => job.id === selectedJobId);
+  const jobAssignments = assignments.filter((assignment: any) => 
     assignment.jobId === selectedJobId
   );
 
@@ -139,7 +139,7 @@ export function JobAssignmentForm() {
               <SelectValue placeholder="Choose a job to assign workers to" />
             </SelectTrigger>
             <SelectContent>
-              {activeJobs?.map((job: Job) => (
+              {activeJobs.map((job: any) => (
                 <SelectItem key={job.id} value={job.id}>
                   {job.jobNumber || job.id.slice(0, 8)} - {job.customerName} ({job.jobType})
                 </SelectItem>
@@ -220,7 +220,7 @@ export function JobAssignmentForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {employees?.map((employee: Employee) => (
+                            {employees.map((employee: any) => (
                               <SelectItem key={employee.id} value={employee.id}>
                                 {employee.name} - {employee.position}
                               </SelectItem>

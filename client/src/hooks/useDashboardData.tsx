@@ -3,12 +3,19 @@ import { useState, useCallback } from 'react';
 import { useWebSocket } from './useWebSocket';
 
 interface DashboardData {
-  todayMetrics: any;
-  topPerformer: any;
-  employeePerformance: any[];
-  weeklyRevenue: { current: number; target: number };
-  yellowSlipCount: number;
-  customerSatisfaction: number;
+  todayMetrics?: any;
+  topPerformer?: any;
+  employeePerformance?: any[];
+  weeklyRevenue?: { current: number; target: number };
+  yellowSlipCount?: number;
+  customerSatisfaction?: number;
+  damageCases?: {
+    yellowSlipCount: number;
+    propertyCasualties: number;
+    equipmentDamage: number;
+    totalCost: number;
+    weeklyTrend: number;
+  };
 }
 
 export function useDashboardData() {

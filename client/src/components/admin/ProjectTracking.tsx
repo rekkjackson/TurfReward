@@ -171,7 +171,7 @@ export function ProjectTracking() {
     return colors[priority as keyof typeof colors] || colors.normal;
   };
 
-  const filteredJobs = jobs?.filter((job: any) => {
+  const filteredJobs = (jobs || []).filter((job: any) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'one_day') return job.category === 'one_day';
     if (activeTab === 'multi_day') return job.category === 'multi_day';

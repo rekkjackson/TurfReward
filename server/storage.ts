@@ -61,7 +61,7 @@ export interface IStorage {
   getLatestCompanyMetric(): Promise<CompanyMetric | undefined>;
 
   // Incident methods
-  getIncidents(): Promise<Incident[]>;
+  getIncidents(employeeId?: string): Promise<Incident[]>;
   createIncident(incident: InsertIncident): Promise<Incident>;
 
   // Enhanced job methods
@@ -381,7 +381,12 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getIncidents(): Promise<Incident[]> {
+  async getIncidents(employeeId?: string): Promise<Incident[]> {
+    if (employeeId) {
+      return await db.select().from(incidents)
+        .where(eq(incidents.employeeId, employeeId))
+        .orderBy(desc(incidents.createdAt));
+    }
     return await db.select().from(incidents).orderBy(desc(incidents.createdAt));
   }
 

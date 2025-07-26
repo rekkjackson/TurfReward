@@ -48,15 +48,20 @@ export default function Dashboard() {
     );
   }
 
-  const {
-    todayMetrics,
-    topPerformer,
-    employeePerformance,
-    weeklyRevenue,
-    yellowSlipCount,
-    customerSatisfaction,
-    damageCases,
-  } = data || {};
+  // Safely extract data with defaults
+  const todayMetrics = data?.todayMetrics;
+  const topPerformer = data?.topPerformer;
+  const employeePerformance = data?.employeePerformance || [];
+  const weeklyRevenue = data?.weeklyRevenue || { current: 0, target: 40000 };
+  const yellowSlipCount = data?.yellowSlipCount || 0;
+  const customerSatisfaction = data?.customerSatisfaction || 4.5;
+  const damageCases = data?.damageCases || {
+    yellowSlipCount: 0,
+    propertyCasualties: 0,
+    equipmentDamage: 0,
+    totalCost: 0,
+    weeklyTrend: 0
+  };
 
   return (
     <div className="bg-slate-dark font-inter text-white min-h-screen overflow-hidden">
@@ -105,20 +110,20 @@ export default function Dashboard() {
 
         <TopPerformerSpotlight performer={topPerformer} />
 
-        <EmployeePerformanceGrid employees={employeePerformance || []} />
+        <EmployeePerformanceGrid employees={employeePerformance} />
 
         <DamageCasesTracker
-          yellowSlipCount={damageCases?.yellowSlipCount || 0}
-          propertyCasualties={damageCases?.propertyCasualties || 0}
-          equipmentDamage={damageCases?.equipmentDamage || 0}
-          totalCost={damageCases?.totalCost || 0}
-          weeklyTrend={damageCases?.weeklyTrend || 0}
+          yellowSlipCount={damageCases.yellowSlipCount}
+          propertyCasualties={damageCases.propertyCasualties}
+          equipmentDamage={damageCases.equipmentDamage}
+          totalCost={damageCases.totalCost}
+          weeklyTrend={damageCases.weeklyTrend}
         />
 
         <GoalsMetricsZone
-          weeklyRevenue={weeklyRevenue || { current: 0, target: 40000 }}
-          yellowSlipCount={yellowSlipCount || 0}
-          customerSatisfaction={customerSatisfaction || 5.0}
+          weeklyRevenue={weeklyRevenue}
+          yellowSlipCount={yellowSlipCount}
+          customerSatisfaction={customerSatisfaction}
         />
       </div>
     </div>

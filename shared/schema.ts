@@ -147,6 +147,7 @@ export const insertJobSchema = createInsertSchema(jobs).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  completedAt: true,
 });
 
 export const insertJobAssignmentSchema = createInsertSchema(jobAssignments).omit({
