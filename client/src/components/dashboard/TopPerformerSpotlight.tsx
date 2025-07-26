@@ -7,7 +7,9 @@ interface TopPerformerSpotlightProps {
     position: string;
     photo?: string;
     efficiency: number;
-    weeklyRevenue: number;
+    weeklyRevenue?: number;
+    performancePay?: number;
+    hourlyRate?: number;
   } | null;
 }
 
@@ -82,7 +84,7 @@ export function TopPerformerSpotlight({ performer }: TopPerformerSpotlightProps)
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              ${performer.weeklyRevenue.toLocaleString()}
+              ${performer.weeklyRevenue?.toLocaleString() || performer.performancePay?.toLocaleString() || '0'}
             </motion.div>
             <div className="text-xs text-green-100">This Week</div>
           </div>

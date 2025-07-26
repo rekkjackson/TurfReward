@@ -342,16 +342,43 @@ export class DatabaseStorage implements IStorage {
     const completedJobsFiltered = completedJobs.filter(job => job.status === 'completed');
     const dailyRevenue = completedJobsFiltered.reduce((sum, job) => sum + parseFloat(job.laborRevenue || '0'), 0);
     
-    // If no metrics for today, create base metrics with real data
+    // Calculate company-wide efficiency from actual job assignments
+    const allAssignments = await this.getJobAssignments();
+    const validAssignments = allAssignments.filter(a => parseFloat(a.hoursWorked || '0') > 0);
+    
+    console.log(`Dashboard: ${allAssignments.length} assignments, ${validAssignments.length} with hours`);
+    
+    let companyEfficiency = 75; // Default fallback
+    if (validAssignments.length > 0) {
+      const efficiencySum = validAssignments.reduce((sum, assignment) => {
+        const job = completedJobs.find(j => j.id === assignment.jobId);
+        if (!job) return sum;
+        const budgeted = parseFloat(job.budgetedHours || '0');
+        const actual = parseFloat(assignment.hoursWorked || '0');
+        // Efficiency = (budgeted / actual) * 100, capped at 150%
+        const efficiency = budgeted > 0 && actual > 0 ? Math.min(150, (budgeted / actual) * 100) : 100;
+        return sum + efficiency;
+      }, 0);
+      companyEfficiency = Math.round(efficiencySum / validAssignments.length);
+      console.log(`Company efficiency calculated: ${companyEfficiency}% from ${validAssignments.length} assignments`);
+    }
+    
+    // Get configurable daily revenue goal from P4P configs (use first config's goal or default)
+    const p4pConfigs = await this.getP4PConfigs();
+    const dailyRevenueGoal = p4pConfigs.length > 0 ? 
+      parseFloat(p4pConfigs[0].minimumWage || '23') * 8 * 10 * 3.5 : // Estimate: min wage × 8hrs × 10 employees × efficiency multiplier
+      6500; // Fallback
+    
+    // If no metrics for today, create base metrics with real calculated data  
     const effectiveMetrics = todayMetrics || {
       id: 'live-dashboard-data',
       date: today,
       dailyRevenue,
-      dailyRevenueGoal: 6500,
+      dailyRevenueGoal,
       mowingJobsCompleted: Number(mowingJobsToday?.count || 0),
       landscapingJobsCompleted: Number(landscapingJobsToday?.count || 0),
-      mowingAverageEfficiency: 2.8,
-      overallEfficiency: 75,
+      mowingAverageEfficiency: companyEfficiency,
+      overallEfficiency: companyEfficiency,
       averageQualityScore: 4.2,
       weatherCondition: 'sunny',
       weatherTemperature: 72,
@@ -359,51 +386,55 @@ export class DatabaseStorage implements IStorage {
       updatedAt: today,
     };
 
-    // Always update with real-time job counts and revenue
+    // Always update with real-time calculated data
     effectiveMetrics.mowingJobsCompleted = Number(mowingJobsToday?.count || 0);
     effectiveMetrics.landscapingJobsCompleted = Number(landscapingJobsToday?.count || 0);
     effectiveMetrics.dailyRevenue = dailyRevenue;
+    effectiveMetrics.dailyRevenueGoal = dailyRevenueGoal;
+    effectiveMetrics.mowingAverageEfficiency = companyEfficiency;
+    effectiveMetrics.overallEfficiency = companyEfficiency;
     effectiveMetrics.id = 'live-calculated';
 
     // Get week start for weekly calculations
     const weekStart = new Date(today);
     weekStart.setDate(today.getDate() - today.getDay());
 
-    // Get employee performance data
-    const employeeMetrics = await db
-      .select({
-        employee: employees,
-        avgEfficiency: sql<number>`AVG(${performanceMetrics.efficiencyScore})`,
-        weeklyRevenue: sql<number>`SUM(${performanceMetrics.revenueGenerated})`,
-        hoursWorked: sql<number>`SUM(${performanceMetrics.hoursWorked})`,
-      })
-      .from(employees)
-      .leftJoin(performanceMetrics, eq(employees.id, performanceMetrics.employeeId))
-      .where(
-        and(
-          eq(employees.isActive, true),
-          gte(performanceMetrics.date, weekStart)
-        )
-      )
-      .groupBy(employees.id)
-      .orderBy(desc(sql`AVG(${performanceMetrics.efficiencyScore})`));
+    // Calculate real employee performance from job assignments
+    const allEmployees = await this.getEmployees();
+    const employeePerformance = allEmployees.map(emp => {
+      const empAssignments = validAssignments.filter(a => a.employeeId === emp.id);
+      const totalP4P = empAssignments.reduce((sum, a) => sum + parseFloat(a.performancePay || '0'), 0);
+      const totalHours = empAssignments.reduce((sum, a) => sum + parseFloat(a.hoursWorked || '0'), 0);
+      const avgHourlyRate = totalHours > 0 ? totalP4P / totalHours : 0;
+      
+      // Efficiency as percentage above minimum wage threshold
+      const minWage = parseFloat(p4pConfigs[0]?.minimumWage || '23');
+      const efficiencyPercent = Math.min(100, Math.max(0, (avgHourlyRate / minWage) * 100));
+      
+      if (totalHours > 0) {
+        console.log(`${emp.name}: ${totalHours}h, $${totalP4P} P4P, $${avgHourlyRate.toFixed(2)}/hr`);
+      }
+      
+      return {
+        id: emp.id,
+        name: emp.name,
+        position: emp.position,
+        efficiency: Math.round(efficiencyPercent),
+        performancePercent: efficiencyPercent,
+        hoursWorked: totalHours,
+        performancePay: totalP4P,
+        hourlyRate: avgHourlyRate,
+        status: avgHourlyRate >= minWage * 1.5 ? 'excellent' : 
+                avgHourlyRate >= minWage * 1.2 ? 'on-track' : 
+                avgHourlyRate >= minWage ? 'needs-focus' : 'training'
+      };
+    }).filter(emp => emp.hoursWorked > 0); // Only employees with work
 
-    // Find top performer
-    const topPerformer = employeeMetrics.length > 0 ? {
-      ...employeeMetrics[0].employee,
-      efficiency: Number(employeeMetrics[0].avgEfficiency || 0),
-      weeklyRevenue: Number(employeeMetrics[0].weeklyRevenue || 0),
-    } : undefined;
+    console.log(`Employee performance calculated for ${employeePerformance.length} employees`);
 
-    // Format employee performance data
-    const employeePerformance = employeeMetrics.map(emp => ({
-      ...emp.employee,
-      efficiency: Number(emp.avgEfficiency || 0),
-      performancePercent: Math.min(100, Math.max(0, (Number(emp.avgEfficiency || 0) / 3.0) * 100)),
-      status: Number(emp.avgEfficiency || 0) >= 3.0 ? 'excellent' : 
-              Number(emp.avgEfficiency || 0) >= 2.5 ? 'on-track' : 
-              Number(emp.avgEfficiency || 0) >= 2.0 ? 'needs-focus' : 'training'
-    }));
+    // Find top performer based on hourly rate
+    const topPerformer = employeePerformance.length > 0 ? 
+      employeePerformance.reduce((top, emp) => emp.hourlyRate > top.hourlyRate ? emp : top) : null;
 
     // Get weekly revenue data
     const weeklyMetrics = await db
