@@ -207,7 +207,7 @@ export function P4PConfigForm() {
                       <Input {...field} type="number" step="0.01" />
                     </FormControl>
                     <FormDescription>
-                      Guaranteed minimum pay per hour ($18/hr minimum)
+                      Guaranteed minimum pay per hour ($23/hr default)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

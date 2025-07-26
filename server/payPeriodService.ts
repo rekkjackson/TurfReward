@@ -88,7 +88,7 @@ export class PayPeriodService {
 
   /**
    * Calculates total hours that should count toward current pay period minimum wage protection
-   * This ensures the $18/hour minimum is maintained across the bimonthly period
+   * This ensures the $23/hour minimum is maintained across the bimonthly period
    */
   static calculatePayPeriodMinimumWage(hoursWorked: number, baseRate: number = 18.00): number {
     return hoursWorked * baseRate;

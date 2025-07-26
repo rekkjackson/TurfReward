@@ -96,8 +96,8 @@ export class P4PCalculationEngine {
       // Total P4P before minimum wage check
       let totalP4P = baseCalculation + trainingBonus + largejobBonus + seasonalBonus;
       
-      // Minimum wage protection: $18/hour minimum (or config minimum)
-      const minimumHourly = parseFloat(p4pConfig.minimumHourlyRate || '18');
+      // Minimum wage protection: Use config minimum hourly rate
+      const minimumHourly = parseFloat(p4pConfig.minimumHourlyRate || '23');
       const minimumPay = hoursWorked * minimumHourly;
       const minimumWageGap = Math.max(0, minimumPay - totalP4P);
       

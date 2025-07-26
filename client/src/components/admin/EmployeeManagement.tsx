@@ -187,7 +187,7 @@ export function EmployeeManagement() {
                         <Input {...field} type="number" step="0.01" />
                       </FormControl>
                       <FormDescription>
-                        Base pay rate (minimum $18/hr per P4P policy)
+                        Base pay rate (minimum $23/hr per P4P policy)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

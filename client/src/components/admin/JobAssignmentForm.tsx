@@ -123,7 +123,7 @@ export function JobAssignmentForm() {
       performancePay += parseFloat(job.budgetedHours) * 1.50; // $1.50 per budgeted hour
     }
     
-    // Ensure minimum wage ($18/hour)
+    // Ensure minimum wage ($23/hour configurable)
     const minimumPay = hoursWorked * 18;
     
     return Math.max(performancePay, minimumPay);

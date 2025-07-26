@@ -49,7 +49,7 @@ async function seedMinimalData() {
     console.log('\n✅ Essential configurations created!');
     console.log('\n📋 Ready for your business data:');
     console.log('• P4P rates set to company standard (33% base, 40% seasonal)');
-    console.log('• $18/hour minimum wage protection');
+    console.log('• $23/hour minimum wage protection');
     console.log('• $4/hour training bonus available');
     console.log('• $1.50/hour large job bonus (49+ hours)');
     

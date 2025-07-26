@@ -68,6 +68,10 @@ export function PayrollDashboard() {
     queryKey: ['/api/jobs'],
   });
 
+  const { data: p4pConfigs = [] } = useQuery<P4PConfig[]>({
+    queryKey: ['/api/p4p-configs'],
+  });
+
   // Calculate payroll summaries for current pay period
   const calculatePayrollSummary = (): PayrollSummary[] => {
     if (!payPeriodData) return [];
@@ -102,9 +106,21 @@ export function PayrollDashboard() {
         sum + parseFloat(assign.performancePay || '0'), 0
       );
 
+      // Get minimum wage from P4P configs (use the job types for this employee's assignments)
+      const employeeJobTypes = [...new Set(empAssignments.map(assign => {
+        const job = jobs.find(j => j.id === assign.jobId);
+        return job?.jobType || 'maintenance';
+      }))];
+      
+      // Use the highest minimum wage if employee worked multiple job types
+      const applicableMinWages = employeeJobTypes.map(jobType => {
+        const config = p4pConfigs.find(c => c.jobType === jobType && c.isActive);
+        return parseFloat(config?.minimumHourlyRate || '23');
+      });
+      const minWage = Math.max(...applicableMinWages, 23); // Default to 23 if no configs found
+      
       // Calculate hourly vs P4P split
-      const baseRate = parseFloat(employee.baseHourlyRate || '18');
-      const minWage = 18; // $18/hour minimum
+      const baseRate = parseFloat(employee.baseHourlyRate || '23');
       const p4pHourlyEquivalent = totalHours > 0 ? totalP4P / totalHours : 0;
       
       let p4pHours = 0;
@@ -278,7 +294,7 @@ export function PayrollDashboard() {
                       </div>
                       <div className="text-xl font-bold text-orange-600">${summary.hourlyPay.toFixed(2)}</div>
                       <div className="text-xs text-orange-600/80">
-                        To meet $18/hour minimum
+                        To meet $23/hour minimum
                       </div>
                     </div>
                   )}

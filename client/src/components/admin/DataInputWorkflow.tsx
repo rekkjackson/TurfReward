@@ -49,14 +49,14 @@ export function DataInputWorkflow() {
       type: "Mowing Routes",
       category: "One-Day Jobs",
       description: "Daily mowing routes with 33% labor revenue (40% March-May)",
-      payStructure: "33% of labor revenue, $18/hr minimum, seasonal bonuses",
+      payStructure: "33% of labor revenue, $23/hr minimum, seasonal bonuses",
       examples: ["Residential Route 5", "Commercial Properties", "HOA Communities"],
     },
     {
       type: "Landscaping Projects", 
       category: "Multi-Day Projects",
       description: "Large landscaping jobs with potential large job bonuses",
-      payStructure: "33% of labor revenue, $1.50/budgeted hour if 49+ hours, $18/hr minimum",
+      payStructure: "33% of labor revenue, $1.50/budgeted hour if 49+ hours, $23/hr minimum",
       examples: ["New Installation", "Landscape Renovation", "Commercial Design"],
     },
     {
@@ -75,7 +75,7 @@ export function DataInputWorkflow() {
     },
     {
       rule: "Minimum Wage Protection",
-      details: "Pay cannot average less than $18/hour per pay period",
+      details: "Pay cannot average less than $23/hour per pay period",
     },
     {
       rule: "Training Bonus",
@@ -233,7 +233,7 @@ export function DataInputWorkflow() {
                     <h4 className="font-semibold text-amber-800">Important Notes:</h4>
                     <ul className="text-sm text-amber-700 mt-1 space-y-1">
                       <li>• Multi-day jobs spanning pay periods: hours paid at base rate until completion</li>
-                      <li>• Equipment maintenance time requires manager approval (paid at $18/hr base)</li>
+                      <li>• Equipment maintenance time requires manager approval (paid at $23/hr base)</li>
                       <li>• $50 bonus for new customer referrals, $10 gift card for existing customer estimates</li>
                       <li>• Quarterly profit sharing: 10% of profits to full-time field team members</li>
                     </ul>

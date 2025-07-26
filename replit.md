@@ -87,7 +87,7 @@ The system now handles both one-day jobs (mowing routes) and multi-day projects 
 2. **Team Assignment**: Employees assigned to jobs with roles (leader, training) and actual hours tracked
 3. **Performance Calculation**: System auto-calculates P4P based on:
    - 33% labor revenue (40% March-May seasonal bonus)
-   - $18/hour minimum wage protection
+   - $23/hour minimum wage protection (configurable per job type)
    - $4/hour training bonus when applicable
    - $1.50/budgeted hour for large jobs (49+ hours)
 4. **Quality Tracking**: Yellow slips, property damage, and equipment issues logged and affect pay
@@ -101,7 +101,7 @@ The system now handles both one-day jobs (mowing routes) and multi-day projects 
 #### P4P Calculation Rules (from business document):
 - Base: 33% of labor revenue split among team
 - Seasonal: 40% rate March-May instead of 33%
-- Minimum: Cannot average less than $18/hour per pay period
+- Minimum: Cannot average less than $23/hour per pay period (configurable by job type)
 - Training: $4/hour bonus for employee training (manager approved)
 - Large Jobs: $1.50 per budgeted hour for 49+ hour jobs
 - Quality Control: Yellow slip costs deducted from performance pay
