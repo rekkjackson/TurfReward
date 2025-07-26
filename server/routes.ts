@@ -140,6 +140,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/job-assignments/:id", async (req, res) => {
+    try {
+      const assignment = await storage.updateJobAssignment(req.params.id, req.body);
+      if (!assignment) {
+        return res.status(404).json({ message: "Job assignment not found" });
+      }
+      res.json(assignment);
+    } catch (error) {
+      console.error('Error updating job assignment:', error);
+      res.status(500).json({ message: "Failed to update job assignment" });
+    }
+  });
+
+  app.delete("/api/job-assignments/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteJobAssignment(req.params.id);
+      if (!success) {
+        return res.status(404).json({ message: "Job assignment not found" });
+      }
+      res.json({ message: "Job assignment deleted successfully" });
+    } catch (error) {
+      console.error('Error deleting job assignment:', error);
+      res.status(500).json({ message: "Failed to delete job assignment" });
+    }
+  });
+
   // Performance Metrics routes
   app.get("/api/performance-metrics", async (req, res) => {
     try {

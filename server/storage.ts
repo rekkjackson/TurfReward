@@ -181,6 +181,25 @@ export class DatabaseStorage implements IStorage {
     return newAssignment;
   }
 
+  async updateJobAssignment(id: string, assignment: Partial<InsertJobAssignment>): Promise<JobAssignment | null> {
+    const [updatedAssignment] = await db
+      .update(jobAssignments)
+      .set(assignment)
+      .where(eq(jobAssignments.id, id))
+      .returning();
+    return updatedAssignment || null;
+  }
+
+  async deleteJobAssignment(id: string): Promise<boolean> {
+    try {
+      const result = await db.delete(jobAssignments).where(eq(jobAssignments.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error('Error deleting job assignment:', error);
+      return false;
+    }
+  }
+
   async getPerformanceMetrics(
     employeeId?: string,
     startDate?: Date,
