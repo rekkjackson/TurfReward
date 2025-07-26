@@ -32,7 +32,7 @@ export const jobs = pgTable("jobs", {
   jobNumber: text("job_number").unique(),
   jobType: text("job_type").notNull(), // 'mowing', 'landscaping', 'maintenance', 'cleanup'
   category: text("category").notNull().default("one_day"), // 'one_day', 'multi_day'
-  customerName: text("customer_name").notNull(),
+  customerName: text("customer_name"),
   customerAddress: text("customer_address"),
   customerPhone: text("customer_phone"),
   budgetedHours: decimal("budgeted_hours", { precision: 10, scale: 2 }).notNull(),
@@ -154,6 +154,19 @@ export const insertJobSchema = createInsertSchema(jobs).omit({
   createdAt: true,
   updatedAt: true,
   completedAt: true,
+}).extend({
+  // Make customer fields optional for maintenance and internal jobs
+  customerName: z.string().optional().or(z.literal('')),
+  customerAddress: z.string().optional().or(z.literal('')),
+  customerPhone: z.string().optional().or(z.literal('')),
+}).transform((data) => {
+  // Convert empty strings to null for optional fields
+  return {
+    ...data,
+    customerName: data.customerName === '' ? null : data.customerName,
+    customerAddress: data.customerAddress === '' ? null : data.customerAddress,
+    customerPhone: data.customerPhone === '' ? null : data.customerPhone,
+  };
 });
 
 export const insertJobAssignmentSchema = createInsertSchema(jobAssignments).omit({
