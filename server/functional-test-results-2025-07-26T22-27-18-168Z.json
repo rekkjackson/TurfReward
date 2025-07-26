@@ -1,0 +1,27 @@
+[
+  {
+    "testName": "Create Employee and Verify",
+    "success": true,
+    "details": "Employee Functional Test Employee created and verified",
+    "responseTime": 109
+  },
+  {
+    "testName": "Create Job and Complete Workflow",
+    "success": false,
+    "details": "Failed job creation/completion workflow",
+    "responseTime": 3,
+    "error": "Failed to create job: 400"
+  },
+  {
+    "testName": "Dashboard Data Integrity",
+    "success": true,
+    "details": "Dashboard data structure verified with all required fields",
+    "responseTime": 194
+  },
+  {
+    "testName": "Pay Period Calculation",
+    "success": true,
+    "details": "Pay period July 26 - August 10, 2025 calculated correctly",
+    "responseTime": 2
+  }
+]
