@@ -7,6 +7,7 @@ import { TopPerformerSpotlight } from '@/components/dashboard/TopPerformerSpotli
 import { EmployeePerformanceGrid } from '@/components/dashboard/EmployeePerformanceGrid';
 import { GoalsMetricsZone } from '@/components/dashboard/GoalsMetricsZone';
 import { DamageCasesTracker } from '@/components/dashboard/DamageCasesTracker';
+import { PayPeriodVisualization } from '@/components/dashboard/PayPeriodVisualization';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Loader2, WifiOff, Settings } from 'lucide-react';
 import { Link } from 'wouter';
@@ -113,6 +114,9 @@ export default function Dashboard() {
 
         <EmployeePerformanceGrid employees={employeePerformance} />
 
+        {/* Interactive Pay Period Visualization */}
+        <PayPeriodVisualization className="col-span-5 row-span-2" />
+
         <DamageCasesTracker
           yellowSlipCount={damageCases.yellowSlipCount}
           propertyCasualties={damageCases.propertyCasualties}
@@ -126,19 +130,6 @@ export default function Dashboard() {
           yellowSlipCount={yellowSlipCount}
           customerSatisfaction={customerSatisfaction}
         />
-        
-        {/* Pay Period Overview - Replaces some existing space */}
-        <div className="col-span-12 row-span-1">
-          <div className="bg-slate-medium rounded-lg p-4 text-center">
-            <div className="text-lg font-semibold mb-2">Current Pay Period</div>
-            <div className="text-sm text-gray-400">
-              {(() => {
-                const currentPeriod = getCurrentPayPeriod();
-                return `${currentPeriod.periodName} (${currentPeriod.periodType})`;
-              })()}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
