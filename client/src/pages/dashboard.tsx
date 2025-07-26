@@ -1,4 +1,5 @@
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { getCurrentPayPeriod } from '@shared/payPeriodUtils';
 import { RevenueThermometer } from '@/components/dashboard/RevenueThermometer';
 import { JobCounters } from '@/components/dashboard/JobCounters';
 import { EfficiencyOverview } from '@/components/dashboard/EfficiencyOverview';
@@ -125,6 +126,19 @@ export default function Dashboard() {
           yellowSlipCount={yellowSlipCount}
           customerSatisfaction={customerSatisfaction}
         />
+        
+        {/* Pay Period Overview - Replaces some existing space */}
+        <div className="col-span-12 row-span-1">
+          <div className="bg-slate-medium rounded-lg p-4 text-center">
+            <div className="text-lg font-semibold mb-2">Current Pay Period</div>
+            <div className="text-sm text-gray-400">
+              {(() => {
+                const currentPeriod = getCurrentPayPeriod();
+                return `${currentPeriod.periodName} (${currentPeriod.periodType})`;
+              })()}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

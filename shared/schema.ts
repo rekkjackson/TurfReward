@@ -61,6 +61,9 @@ export const jobAssignments = pgTable("job_assignments", {
   isLeader: boolean("is_leader").default(false),
   isTraining: boolean("is_training").default(false),
   performancePay: decimal("performance_pay", { precision: 10, scale: 2 }).default("0.00"),
+  payPeriodStart: timestamp("pay_period_start"),
+  payPeriodEnd: timestamp("pay_period_end"),
+  payPeriodType: text("pay_period_type", { enum: ['11-25', '26-10'] }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -68,6 +71,9 @@ export const performanceMetrics = pgTable("performance_metrics", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   employeeId: uuid("employee_id").references(() => employees.id).notNull(),
   date: timestamp("date").notNull(),
+  payPeriodStart: timestamp("pay_period_start").notNull(),
+  payPeriodEnd: timestamp("pay_period_end").notNull(),
+  payPeriodType: text("pay_period_type", { enum: ['11-25', '26-10'] }).notNull(),
   efficiencyScore: decimal("efficiency_score", { precision: 5, scale: 2 }),
   revenueGenerated: decimal("revenue_generated", { precision: 10, scale: 2 }).default("0.00"),
   hoursWorked: decimal("hours_worked", { precision: 10, scale: 2 }).default("0.00"),

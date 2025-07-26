@@ -220,7 +220,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dashboardData = await storage.getDashboardData();
       res.json(dashboardData);
     } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
       res.status(500).json({ message: "Failed to fetch dashboard data" });
+    }
+  });
+
+  // Pay period information route
+  app.get("/api/pay-period/current", async (req, res) => {
+    try {
+      const { PayPeriodService } = await import("./payPeriodService");
+      const payPeriodSummary = PayPeriodService.getCurrentPeriodSummary();
+      res.json(payPeriodSummary);
+    } catch (error) {
+      console.error('Failed to fetch pay period data:', error);
+      res.status(500).json({ message: "Failed to fetch pay period data" });
     }
   });
 

@@ -8,6 +8,14 @@ This is a comprehensive Pay-for-Performance (P4P) dashboard application for a la
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (Updated: July 26, 2025)
+
+✓ **Bimonthly Pay Period System Implemented**: Added comprehensive support for bimonthly pay periods (11-25, 26-10) throughout the system
+✓ **Pay Period Utilities**: Created shared utilities for calculating and managing pay periods with proper date handling
+✓ **Database Schema Updates**: Enhanced performance metrics and job assignments to track pay period information
+✓ **Pay Period Dashboard Component**: Added visual display of current pay period status in dashboard
+✓ **Admin Pay Period Selector**: Implemented pay period selection interface for administrative functions
+
 ## System Architecture
 
 The application follows a full-stack architecture with clear separation between frontend, backend, and data layers:
