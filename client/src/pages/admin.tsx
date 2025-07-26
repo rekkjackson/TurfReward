@@ -8,7 +8,8 @@ import { ProjectTracking } from '@/components/admin/ProjectTracking';
 import { JobAssignmentForm } from '@/components/admin/JobAssignmentForm';
 import { DataInputWorkflow } from '@/components/admin/DataInputWorkflow';
 import { PayrollDashboard } from '@/components/admin/PayrollDashboard';
-import { Settings, Users, DollarSign, BarChart3, AlertTriangle, Calendar, Briefcase } from 'lucide-react';
+import { AccountantPayrollReport } from '@/components/admin/AccountantPayrollReport';
+import { Settings, Users, DollarSign, BarChart3, AlertTriangle, Calendar, Briefcase, Calculator } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 
@@ -32,7 +33,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="workflow" className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="workflow" className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4" />
               <span>Workflow</span>
@@ -48,6 +49,10 @@ export default function Admin() {
             <TabsTrigger value="payroll" className="flex items-center space-x-2">
               <DollarSign className="w-4 h-4" />
               <span>Payroll</span>
+            </TabsTrigger>
+            <TabsTrigger value="accountant" className="flex items-center space-x-2">
+              <Calculator className="w-4 h-4" />
+              <span>Accountant</span>
             </TabsTrigger>
             <TabsTrigger value="employees" className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
@@ -123,6 +128,10 @@ export default function Admin() {
 
           <TabsContent value="payroll" className="space-y-6">
             <PayrollDashboard />
+          </TabsContent>
+
+          <TabsContent value="accountant" className="space-y-6">
+            <AccountantPayrollReport />
           </TabsContent>
 
           <TabsContent value="employees" className="space-y-6">

@@ -25,16 +25,20 @@ export function IncidentManagement() {
     queryKey: ['/api/incidents'],
   });
 
-  const { data: employees } = useQuery({
+  const { data: employees = [] } = useQuery<Employee[]>({
     queryKey: ['/api/employees'],
   });
 
+  const { data: jobs = [] } = useQuery({
+    queryKey: ['/api/jobs'],
+  });
+
   const form = useForm({
-    resolver: zodResolver(insertIncidentSchema),
+    resolver: zodResolver(insertIncidentSchema.omit({ id: true, createdAt: true, updatedAt: true })),
     defaultValues: {
       employeeId: '',
       jobId: '',
-      type: '',
+      type: 'yellow_slip',
       description: '',
       cost: '0.00',
       resolved: false,
@@ -128,6 +132,32 @@ export function IncidentManagement() {
                           {employees && employees.map((employee: Employee) => (
                             <SelectItem key={employee.id} value={employee.id}>
                               {employee.name} - {employee.position}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="jobId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Related Job (Optional)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select job if applicable" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">No specific job</SelectItem>
+                          {jobs.map((job: any) => (
+                            <SelectItem key={job.id} value={job.id}>
+                              {job.jobNumber} - {job.customerName || 'Internal Job'}
                             </SelectItem>
                           ))}
                         </SelectContent>
