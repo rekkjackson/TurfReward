@@ -431,6 +431,8 @@ export class DatabaseStorage implements IStorage {
       date: today,
       dailyRevenue,
       dailyRevenueGoal,
+      monthlyRevenue,
+      monthlyRevenueGoal,
       mowingJobsCompleted: Number(mowingJobsToday?.count || 0),
       landscapingJobsCompleted: Number(landscapingJobsToday?.count || 0),
       mowingAverageEfficiency: companyEfficiency,

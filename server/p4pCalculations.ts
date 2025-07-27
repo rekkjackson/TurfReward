@@ -1,5 +1,5 @@
 import { db } from './db';
-import { jobs, jobAssignments, p4pConfigs, employees } from '@shared/schema';
+import { jobs, jobAssignments, p4pConfigs, employees, incidents } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 
 interface P4PCalculationResult {
@@ -16,6 +16,8 @@ interface P4PCalculationResult {
     largejobBonus: number;
     seasonalBonus: number;
     minimumWageGap: number;
+    incidentDeductions: number;
+    estimateReviewBonuses: number;
   };
 }
 
@@ -101,8 +103,24 @@ export class P4PCalculationEngine {
       const seasonalBonus = isSeasonalPeriod && assignment.job.isSeasonalBonus ? 
         (laborRevenue * 0.07) / teamSize : 0; // 7% additional (40% - 33%)
       
-      // Total P4P before minimum wage check
-      let totalP4P = baseCalculation + trainingBonus + largejobBonus + seasonalBonus;
+      // Get incident adjustments for this employee
+      const employeeIncidents = await db
+        .select()
+        .from(incidents)
+        .where(eq(incidents.employeeId, assignment.employee.id));
+      
+      // Calculate incident deductions (yellow slips, property damage, equipment damage)
+      const incidentDeductions = employeeIncidents
+        .filter(i => ['yellow_slip', 'property_damage', 'equipment_damage'].includes(i.type))
+        .reduce((sum, incident) => sum + parseFloat(incident.cost || '0'), 0);
+      
+      // Calculate bonuses for estimates and reviews ($25 each)
+      const estimateReviewBonuses = employeeIncidents
+        .filter(i => ['customer_review', 'estimate_completed'].includes(i.type))
+        .length * 25; // $25 bonus per estimate/review
+      
+      // Total P4P with incident adjustments
+      let totalP4P = baseCalculation + trainingBonus + largejobBonus + seasonalBonus + estimateReviewBonuses - incidentDeductions;
       
       // Minimum wage protection: Use config minimum hourly rate
       const minimumHourly = parseFloat(p4pConfig.minimumHourlyRate || '23');
@@ -126,7 +144,9 @@ export class P4PCalculationEngine {
           trainingBonus,
           largejobBonus,
           seasonalBonus,
-          minimumWageGap
+          minimumWageGap,
+          incidentDeductions,
+          estimateReviewBonuses
         }
       };
 
