@@ -1,5 +1,5 @@
 import { db } from './db';
-import { achievements, employees, jobAssignments, jobs } from '@shared/schema';
+import { achievements, employees, jobAssignments, jobs, achievementConfigs } from '@shared/schema';
 import { eq, and, gte, lte, desc, sql, isNull } from 'drizzle-orm';
 
 export interface AchievementRule {
@@ -167,26 +167,7 @@ export class AchievementEngine {
     }
   ];
 
-  /**
-   * Check and award achievements for all employees
-   */
-  static async processWeeklyAchievements(): Promise<void> {
-    try {
-      const weekStart = new Date();
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of current week
-      weekStart.setHours(0, 0, 0, 0);
 
-      const allEmployees = await db.select().from(employees).where(eq(employees.isActive, true));
-
-      for (const employee of allEmployees) {
-        await this.checkEmployeeAchievements(employee.id, weekStart);
-      }
-
-      console.log(`Processed achievements for ${allEmployees.length} employees`);
-    } catch (error) {
-      console.error('Error processing weekly achievements:', error);
-    }
-  }
 
   /**
    * Check achievements for a specific employee
@@ -461,17 +442,17 @@ export class AchievementEngine {
     console.log('🏆 Processing weekly achievements...');
     
     try {
-      const employees = await db.select().from(require('@shared/schema').employees)
-        .where(eq(require('@shared/schema').employees.isActive, true));
+      const allEmployees = await db.select().from(employees)
+        .where(eq(employees.isActive, true));
       
       const weekStart = new Date();
       weekStart.setDate(weekStart.getDate() - weekStart.getDay());
       weekStart.setHours(0, 0, 0, 0);
 
-      console.log(`Processing achievements for ${employees.length} active employees`);
+      console.log(`Processing achievements for ${allEmployees.length} active employees`);
 
       // Process built-in achievement types
-      for (const employee of employees) {
+      for (const employee of allEmployees) {
         try {
           await this.checkBuiltInAchievements(employee.id, weekStart);
         } catch (error) {
@@ -479,14 +460,13 @@ export class AchievementEngine {
         }
       }
 
-      // Process custom achievement configs
-      const { achievementConfigs } = require('@shared/schema');
+      // Process custom achievement configs  
       const customConfigs = await db.select().from(achievementConfigs)
         .where(eq(achievementConfigs.isActive, true));
 
       console.log(`Found ${customConfigs.length} active custom achievement configs`);
 
-      for (const employee of employees) {
+      for (const employee of allEmployees) {
         for (const config of customConfigs) {
           try {
             console.log(`Checking ${config.title} for ${employee.name}`);
@@ -502,7 +482,7 @@ export class AchievementEngine {
         }
       }
       
-      console.log(`✅ Achievement processing completed for ${employees.length} employees`);
+      console.log(`✅ Achievement processing completed for ${allEmployees.length} employees`);
     } catch (error) {
       console.error('❌ Error in processWeeklyAchievements:', error);
       throw error;

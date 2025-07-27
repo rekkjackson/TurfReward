@@ -545,8 +545,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Achievements processed successfully" });
     } catch (error) {
       console.error('❌ Error processing achievements:', error);
-      console.error('Full error stack:', error.stack);
-      res.status(500).json({ message: "Failed to process achievements", error: error.message });
+      console.error('Full error stack:', (error as Error).stack);
+      res.status(500).json({ message: "Failed to process achievements", error: (error as Error).message });
     }
   });
 
