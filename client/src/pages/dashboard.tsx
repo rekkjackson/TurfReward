@@ -97,7 +97,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - New Layout */}
-        <div className="flex-1 space-y-6">
+        <div className="flex-1 space-y-6 overflow-y-auto min-h-0">
           {/* Monthly Revenue Thermometer */}
           <MonthlyRevenueThermometer 
             currentRevenue={(todayMetrics?.dailyRevenue || 0) * (new Date().getDate())}
@@ -108,8 +108,8 @@ export default function Dashboard() {
           <CompanyMetrics 
             yellowSlips={yellowSlipCount}
             damageCases={damageCases.propertyCasualties + damageCases.equipmentDamage}
-            reviews={Math.floor(Math.random() * 15) + 8}
-            estimates={Math.floor(Math.random() * 20) + 12}
+            reviews={todayMetrics?.customerReviews || 0}
+            estimates={todayMetrics?.estimatesCompleted || 0}
             completedJobs={(todayMetrics?.mowingJobsCompleted || 0) + (todayMetrics?.landscapingJobsCompleted || 0)}
             averageRating={customerSatisfaction}
           />
@@ -118,24 +118,24 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 gap-6">
             <WorkTypeBreakdown 
               maintenance={{
-                jobs: Math.floor(Math.random() * 8) + 3,
-                revenue: Math.floor(Math.random() * 5000) + 2000,
-                efficiency: todayMetrics?.overallEfficiency || 75
+                jobs: todayMetrics?.maintenanceJobsCompleted || 0,
+                revenue: todayMetrics?.maintenanceRevenue || 0,
+                efficiency: todayMetrics?.maintenanceEfficiency || 75
               }}
               landscaping={{
                 jobs: todayMetrics?.landscapingJobsCompleted || 0,
-                revenue: Math.floor(Math.random() * 8000) + 4000,
-                efficiency: todayMetrics?.overallEfficiency || 75
+                revenue: todayMetrics?.landscapingRevenue || 0,
+                efficiency: todayMetrics?.landscapingEfficiency || 75
               }}
               mowing={{
                 jobs: todayMetrics?.mowingJobsCompleted || 0,
-                revenue: Math.floor(Math.random() * 6000) + 3000,
+                revenue: todayMetrics?.mowingRevenue || 0,
                 efficiency: todayMetrics?.mowingAverageEfficiency || 75
               }}
               cleanup={{
-                jobs: Math.floor(Math.random() * 5) + 1,
-                revenue: Math.floor(Math.random() * 3000) + 1500,
-                efficiency: todayMetrics?.overallEfficiency || 75
+                jobs: todayMetrics?.cleanupJobsCompleted || 0,
+                revenue: todayMetrics?.cleanupRevenue || 0,
+                efficiency: todayMetrics?.cleanupEfficiency || 75
               }}
             />
             
