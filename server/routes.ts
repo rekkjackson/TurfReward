@@ -131,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Job not found" });
       }
 
-      // If job was just completed, calculate P4P for all assignments
+      // Handle P4P calculation based on job status
       if (updateData.status === 'completed') {
         console.log(`Job ${req.params.id} completed - calculating P4P for all assignments`);
         try {
@@ -151,6 +151,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (p4pError) {
           console.error('P4P calculation failed for completed job:', p4pError);
+        }
+      } else if (updateData.status && updateData.status !== 'completed') {
+        // If job status changed to anything other than completed, reset P4P to $0
+        console.log(`Job ${req.params.id} status changed to ${updateData.status} - resetting P4P to $0`);
+        try {
+          const assignments = await storage.getJobAssignments();
+          const jobAssignments = assignments.filter(a => a.jobId === req.params.id);
+          
+          for (const assignment of jobAssignments) {
+            await storage.updateJobAssignment(assignment.id, {
+              performancePay: '0.00'
+            });
+            console.log(`P4P reset to $0.00 for assignment ${assignment.id}`);
+          }
+        } catch (resetError) {
+          console.error('P4P reset failed for uncompleted job:', resetError);
         }
       }
 

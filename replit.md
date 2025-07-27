@@ -10,13 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Updated: July 27, 2025)
 
-✓ **Job Editing Fixed**: Complete edit dialog implemented with all form fields for modifying job details
+✓ **P4P Completion Logic Fixed**: Performance pay now only calculated when jobs are marked "completed"
+✓ **P4P Reset Mechanism**: Automatically resets P4P to $0 when jobs are uncompleted (pending/in_progress)
 ✓ **Dual Hour Tracking System**: Separate tracking for total hours (base pay) vs jobsite hours (P4P calculations)
 ✓ **Base Pay Structure**: Total hours include travel/lunch time for fair base wage compensation
-✓ **P4P Calculation Enhancement**: Performance pay now calculated using productive jobsite hours only
+✓ **Job Status-Based P4P**: P4P calculation triggered by job completion status changes
 ✓ **Database Schema Updated**: Added jobsite_hours column to job_assignments table
 ✓ **UI Enhancement**: Job assignment form now shows both hour types with clear descriptions
-✓ **P4P System Enhancement**: Added cleanup job configuration for proper performance pay calculations
 
 ## System Architecture
 
