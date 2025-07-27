@@ -45,6 +45,29 @@ export class P4PCalculationEngine {
         return null;
       }
 
+      // CRITICAL: Only calculate P4P for completed jobs
+      if (assignment.job.status !== 'completed') {
+        console.log(`Job ${assignment.job.id} not completed yet - no P4P calculation`);
+        return {
+          assignmentId,
+          performancePay: 0,
+          hourlyEquivalent: 0,
+          details: {
+            laborRevenue: 0,
+            revenuePercentage: 0,
+            teamSize: 0,
+            jobsiteHours: 0,
+            baseCalculation: 0,
+            trainingBonus: 0,
+            largejobBonus: 0,
+            seasonalBonus: 0,
+            minimumWageGap: 0,
+            incidentDeductions: 0,
+            estimateReviewBonuses: 0,
+          }
+        };
+      }
+
       // Get P4P configuration for this job type
       const [p4pConfig] = await db
         .select()
