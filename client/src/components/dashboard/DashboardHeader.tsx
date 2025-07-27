@@ -19,7 +19,7 @@ const getWeatherIcon = (condition: string) => {
   }
 };
 
-export function DashboardHeader({ weatherCondition = "Sunny", weatherTemperature = 72 }: DashboardHeaderProps) {
+export function DashboardHeader({ weatherCondition = "Sunny", weatherTemperature = 25 }: DashboardHeaderProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function DashboardHeader({ weatherCondition = "Sunny", weatherTemperature
         <div className="flex items-center space-x-2 bg-slate-light rounded-lg px-4 py-2">
           {getWeatherIcon(weatherCondition)}
           <div>
-            <div className="text-lg font-semibold">{weatherTemperature}°F</div>
+            <div className="text-lg font-semibold">{weatherTemperature}°C</div>
             <div className="text-xs text-gray-400">{weatherCondition}</div>
           </div>
         </div>

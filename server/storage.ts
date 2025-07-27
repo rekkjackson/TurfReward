@@ -597,7 +597,7 @@ export class DatabaseStorage implements IStorage {
         averageQualityScore: 4.5,
         customerReviews: allIncidents.filter(i => i.type === 'customer_review').length || 12,
         estimatesCompleted: allIncidents.filter(i => i.type === 'estimate_completed').length || 18,
-        weatherTemperature: 78,
+        weatherTemperature: 25,
         weatherCondition: "sunny" as const,
       },
       topPerformer,
@@ -627,6 +627,16 @@ export class DatabaseStorage implements IStorage {
   async createIncident(incidentData: InsertIncident): Promise<Incident> {
     const [incident] = await db.insert(incidents).values(incidentData).returning();
     return incident;
+  }
+
+  async deleteIncident(id: string): Promise<boolean> {
+    try {
+      const result = await db.delete(incidents).where(eq(incidents.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error('Error deleting incident:', error);
+      return false;
+    }
   }
 
   async updateJob(id: string, updateData: Partial<Job>): Promise<Job | null> {

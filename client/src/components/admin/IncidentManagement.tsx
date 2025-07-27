@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { insertIncidentSchema, type Incident, type Employee } from '@shared/schema';
-import { AlertTriangle, Plus, Wrench, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Plus, Wrench, AlertCircle, Trash2 } from 'lucide-react';
 
 export function IncidentManagement() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -56,6 +56,18 @@ export function IncidentManagement() {
     },
     onError: () => {
       toast({ title: 'Error', description: 'Failed to record incident', variant: 'destructive' });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiRequest('DELETE', `/api/incidents/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/incidents'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
+      toast({ title: 'Success', description: 'Incident deleted successfully' });
+    },
+    onError: () => {
+      toast({ title: 'Error', description: 'Failed to delete incident', variant: 'destructive' });
     },
   });
 
@@ -310,6 +322,14 @@ export function IncidentManagement() {
                     <Badge variant={incident.resolved ? "default" : "secondary"}>
                       {incident.resolved ? "Resolved" : "Open"}
                     </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteMutation.mutate(incident.id)}
+                      className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardHeader>

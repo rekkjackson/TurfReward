@@ -110,7 +110,7 @@ export default function Dashboard() {
             damageCases={damageCases.propertyCasualties + damageCases.equipmentDamage}
             reviews={todayMetrics?.customerReviews || 0}
             estimates={todayMetrics?.estimatesCompleted || 0}
-            completedJobs={(todayMetrics?.mowingJobsCompleted || 0) + (todayMetrics?.landscapingJobsCompleted || 0)}
+            completedJobs={(todayMetrics?.mowingJobsCompleted || 0) + (todayMetrics?.landscapingJobsCompleted || 0) + (todayMetrics?.maintenanceJobsCompleted || 0) + (todayMetrics?.cleanupJobsCompleted || 0)}
             averageRating={customerSatisfaction}
           />
 

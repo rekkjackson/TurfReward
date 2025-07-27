@@ -295,6 +295,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/incidents/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteIncident(req.params.id);
+      if (!success) {
+        return res.status(404).json({ message: "Incident not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting incident:', error);
+      res.status(500).json({ message: "Failed to delete incident" });
+    }
+  });
+
   // Company Metrics routes
   app.get("/api/company-metrics", async (req, res) => {
     try {
