@@ -7,8 +7,10 @@ interface MonthlyRevenueThermometerProps {
 }
 
 export function MonthlyRevenueThermometer({ currentRevenue, monthlyGoal }: MonthlyRevenueThermometerProps) {
-  const percentage = Math.min((currentRevenue / monthlyGoal) * 100, 100);
+  // Calculate cumulative monthly revenue (daily revenue * days passed)
   const daysInMonth = new Date().getDate();
+  const cumulativeRevenue = currentRevenue * daysInMonth;
+  const percentage = Math.min((cumulativeRevenue / monthlyGoal) * 100, 100);
   const totalDaysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
   const expectedPercentage = (daysInMonth / totalDaysInMonth) * 100;
   
@@ -26,7 +28,7 @@ export function MonthlyRevenueThermometer({ currentRevenue, monthlyGoal }: Month
         </div>
         <div className="text-right">
           <div className="text-2xl font-bold text-white">
-            ${currentRevenue.toLocaleString()}
+            ${cumulativeRevenue.toLocaleString()}
           </div>
           <div className="text-sm text-gray-400">
             of ${monthlyGoal.toLocaleString()}
