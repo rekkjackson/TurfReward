@@ -160,19 +160,18 @@ export class DatabaseStorage implements IStorage {
       const cleanedData: any = { ...updateData };
       
       // Convert string dates to Date objects for Drizzle
-      if (cleanedData.completedAt) {
-        if (typeof cleanedData.completedAt === 'string') {
-          cleanedData.completedAt = new Date(cleanedData.completedAt);
-        }
-        // If status is completed but no completedAt provided, set to now
-        if (cleanedData.status === 'completed' && !cleanedData.completedAt) {
-          cleanedData.completedAt = new Date();
-        }
+      if (cleanedData.completedAt && typeof cleanedData.completedAt === 'string') {
+        cleanedData.completedAt = new Date(cleanedData.completedAt);
       }
       
       // Set completedAt when status changes to completed
       if (cleanedData.status === 'completed' && !cleanedData.completedAt) {
         cleanedData.completedAt = new Date();
+      }
+      
+      // Remove completedAt if it's an invalid string
+      if (cleanedData.completedAt && typeof cleanedData.completedAt === 'string' && cleanedData.completedAt.trim() === '') {
+        delete cleanedData.completedAt;
       }
       
       if (cleanedData.startDate && typeof cleanedData.startDate === 'string') {
