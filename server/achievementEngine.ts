@@ -367,12 +367,50 @@ export class AchievementEngine {
           };
 
         case 'safety_streak':
-          // Check safety streak (simplified - no incidents for X weeks)
-          return { earned: true, value: 1 }; // Always true for demo
+          // Check safety streak - no incidents for specified weeks
+          const weeksToCheck = parseInt(config.threshold) || 1;
+          const checkStart = new Date(weekStart);
+          checkStart.setDate(checkStart.getDate() - (weeksToCheck * 7));
+          
+          const incidents = await db
+            .select({ count: sql<number>`COUNT(*)` })
+            .from(require('@shared/schema').incidents)
+            .where(
+              and(
+                eq(require('@shared/schema').incidents.employeeId, employeeId),
+                gte(require('@shared/schema').incidents.createdAt, checkStart),
+                lte(require('@shared/schema').incidents.createdAt, weekEnd)
+              )
+            );
+          
+          const incidentCount = Number(incidents[0]?.count || 0);
+          return { earned: incidentCount === 0, value: weeksToCheck };
 
         case 'custom':
-          // Custom criteria - simplified implementation
-          return { earned: Math.random() > 0.8, value: 1 }; // Random chance for demo
+          // For perfectionist - jobs without incidents
+          const jobsWithoutIncidents = await db
+            .select({ count: sql<number>`COUNT(*)` })
+            .from(jobAssignments)
+            .leftJoin(jobs, eq(jobAssignments.jobId, jobs.id))
+            .leftJoin(require('@shared/schema').incidents, 
+              and(
+                eq(require('@shared/schema').incidents.employeeId, employeeId),
+                eq(require('@shared/schema').incidents.jobId, jobs.id)
+              )
+            )
+            .where(
+              and(
+                eq(jobAssignments.employeeId, employeeId),
+                eq(jobs.status, 'completed'),
+                isNull(require('@shared/schema').incidents.id) // No incidents
+              )
+            );
+          
+          const cleanJobs = Number(jobsWithoutIncidents[0]?.count || 0);
+          return { 
+            earned: cleanJobs >= parseFloat(config.threshold), 
+            value: cleanJobs 
+          };
 
         default:
           return { earned: false };
@@ -428,33 +466,52 @@ export class AchievementEngine {
   static async processWeeklyAchievements() {
     console.log('🏆 Processing weekly achievements...');
     
-    const employees = await db.select().from(require('@shared/schema').employees);
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    weekStart.setHours(0, 0, 0, 0);
+    try {
+      const employees = await db.select().from(require('@shared/schema').employees)
+        .where(eq(require('@shared/schema').employees.isActive, true));
+      
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      weekStart.setHours(0, 0, 0, 0);
 
-    // Process built-in achievement types
-    for (const employee of employees) {
-      if (!employee.isActive) continue;
-      await this.checkAndAwardAchievements(employee.id, weekStart);
-    }
+      console.log(`Processing achievements for ${employees.length} active employees`);
 
-    // Process custom achievement configs
-    const customConfigs = await db.select().from(require('@shared/schema').achievementConfigs)
-      .where(eq(require('@shared/schema').achievementConfigs.isActive, true));
-
-    for (const employee of employees) {
-      if (!employee.isActive) continue;
-
-      for (const config of customConfigs) {
-        const result = await this.checkCustomCriteria(employee.id, config, weekStart);
-        
-        if (result.earned) {
-          await this.awardCustomAchievement(employee.id, config, result.value);
+      // Process built-in achievement types
+      for (const employee of employees) {
+        try {
+          await this.checkAndAwardAchievements(employee.id, weekStart);
+        } catch (error) {
+          console.error(`Error processing built-in achievements for ${employee.name}:`, error);
         }
       }
+
+      // Process custom achievement configs
+      const { achievementConfigs } = require('@shared/schema');
+      const customConfigs = await db.select().from(achievementConfigs)
+        .where(eq(achievementConfigs.isActive, true));
+
+      console.log(`Found ${customConfigs.length} active custom achievement configs`);
+
+      for (const employee of employees) {
+        for (const config of customConfigs) {
+          try {
+            console.log(`Checking ${config.title} for ${employee.name}`);
+            const result = await this.checkCustomCriteria(employee.id, config, weekStart);
+            
+            if (result.earned) {
+              console.log(`🎉 ${employee.name} earned ${config.title}!`);
+              await this.awardCustomAchievement(employee.id, config, result.value);
+            }
+          } catch (error) {
+            console.error(`Error checking ${config.title} for ${employee.name}:`, error);
+          }
+        }
+      }
+      
+      console.log(`✅ Achievement processing completed for ${employees.length} employees`);
+    } catch (error) {
+      console.error('❌ Error in processWeeklyAchievements:', error);
+      throw error;
     }
-    
-    console.log(`Processed achievements for ${employees.length} employees`);
   }
 }
