@@ -14,9 +14,10 @@ Preferred communication style: Simple, everyday language.
 ✓ **Individual Compensation Logic**: Higher-paid employees get higher minimum protection, lower-paid get lower minimums
 ✓ **P4P Completion Logic Fixed**: Performance pay now only calculated when jobs are marked "completed"
 ✓ **P4P Reset Mechanism**: Automatically resets P4P to $0 when jobs are uncompleted (pending/in_progress)
+✓ **Dashboard Performance Logic**: Employee performance grid only shows workers with completed jobs
 ✓ **Dual Hour Tracking System**: Separate tracking for total hours (base pay) vs jobsite hours (P4P calculations)
 ✓ **Job Status-Based P4P**: P4P calculation triggered by job completion status changes
-✓ **Individual Rate Protection**: Derek ($25/hour) vs Christine ($20/hour) get different minimum calculations
+✓ **Individual Rate Protection**: All employees standardized to $25/hour base rate with proper minimum enforcement
 
 ## System Architecture
 

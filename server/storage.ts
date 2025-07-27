@@ -464,20 +464,28 @@ export class DatabaseStorage implements IStorage {
     const weekStart = new Date(today);
     weekStart.setDate(today.getDate() - today.getDay());
 
-    // Calculate real employee performance from job assignments
+    // Calculate real employee performance from job assignments - ONLY for completed jobs
     const allEmployees = await this.getEmployees();
     const employeePerformance = allEmployees.map(emp => {
-      const empAssignments = validAssignments.filter(a => a.employeeId === emp.id);
+      // Only include assignments from completed jobs
+      const empAssignments = allAssignments.filter(a => {
+        return a.employeeId === emp.id && 
+               parseFloat(a.hoursWorked || '0') > 0 && 
+               a.job && 
+               a.job.status === 'completed';
+      });
       const totalP4P = empAssignments.reduce((sum, a) => sum + parseFloat(a.performancePay || '0'), 0);
       const totalHours = empAssignments.reduce((sum, a) => sum + parseFloat(a.hoursWorked || '0'), 0);
       const avgHourlyRate = totalHours > 0 ? totalP4P / totalHours : 0;
       
       // Efficiency as percentage above minimum wage threshold
-      const minWage = parseFloat(p4pConfigs[0]?.minimumWage || '23');
+      const minWage = parseFloat(p4pConfigs[0]?.minimumHourlyRate || '23');
       const efficiencyPercent = Math.min(100, Math.max(0, (avgHourlyRate / minWage) * 100));
       
       if (totalHours > 0) {
         console.log(`${emp.name}: ${totalHours}h, $${totalP4P} P4P, $${avgHourlyRate.toFixed(2)}/hr`);
+      } else {
+        console.log(`${emp.name}: No completed work this period`);
       }
       
       return {
