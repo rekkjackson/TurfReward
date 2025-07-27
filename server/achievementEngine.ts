@@ -260,4 +260,201 @@ export class AchievementEngine {
       .orderBy(desc(achievements.earnedAt))
       .limit(limit);
   }
+
+  /**
+   * Check custom achievement criteria
+   */
+  static async checkCustomCriteria(employeeId: string, config: any, weekStart: Date): Promise<{ earned: boolean; value?: number }> {
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
+    
+    try {
+      switch (config.criteria) {
+        case 'efficiency_threshold':
+          // Check if employee achieved efficiency above threshold
+          const assignments = await db
+            .select()
+            .from(jobAssignments)
+            .leftJoin(jobs, eq(jobAssignments.jobId, jobs.id))
+            .where(
+              and(
+                eq(jobAssignments.employeeId, employeeId),
+                gte(jobs.completedAt, weekStart),
+                lte(jobs.completedAt, weekEnd),
+                eq(jobs.status, 'completed')
+              )
+            );
+
+          for (const assignment of assignments) {
+            const budgeted = parseFloat(assignment.jobs.budgetedHours || '0');
+            const actual = parseFloat(assignment.job_assignments.hoursWorked || '0');
+            const efficiency = budgeted > 0 && actual > 0 ? (budgeted / actual) * 100 : 0;
+            
+            if (efficiency >= parseFloat(config.threshold)) {
+              return { earned: true, value: efficiency };
+            }
+          }
+          return { earned: false };
+
+        case 'revenue_milestone':
+          // Check if P4P earnings exceed threshold this week
+          const weeklyRevenue = await db
+            .select({
+              totalP4P: sql<number>`SUM(CAST(${jobAssignments.performancePay} AS DECIMAL))`
+            })
+            .from(jobAssignments)
+            .leftJoin(jobs, eq(jobAssignments.jobId, jobs.id))
+            .where(
+              and(
+                eq(jobAssignments.employeeId, employeeId),
+                gte(jobs.completedAt, weekStart),
+                lte(jobs.completedAt, weekEnd),
+                eq(jobs.status, 'completed')
+              )
+            );
+
+          const totalRevenue = Number(weeklyRevenue[0]?.totalP4P || 0);
+          return { 
+            earned: totalRevenue >= parseFloat(config.threshold), 
+            value: totalRevenue 
+          };
+
+        case 'work_days':
+          // Check number of days worked this week
+          const workDays = await db
+            .select({
+              days: sql<number>`COUNT(DISTINCT DATE(${jobs.completedAt}))`
+            })
+            .from(jobAssignments)
+            .leftJoin(jobs, eq(jobAssignments.jobId, jobs.id))
+            .where(
+              and(
+                eq(jobAssignments.employeeId, employeeId),
+                gte(jobs.completedAt, weekStart),
+                lte(jobs.completedAt, weekEnd),
+                eq(jobs.status, 'completed')
+              )
+            );
+
+          const daysWorked = Number(workDays[0]?.days || 0);
+          return { 
+            earned: daysWorked >= parseFloat(config.threshold), 
+            value: daysWorked 
+          };
+
+        case 'leadership_roles':
+          // Check number of jobs led as crew leader
+          const leadershipJobs = await db
+            .select({
+              count: sql<number>`COUNT(*)`
+            })
+            .from(jobAssignments)
+            .leftJoin(jobs, eq(jobAssignments.jobId, jobs.id))
+            .where(
+              and(
+                eq(jobAssignments.employeeId, employeeId),
+                eq(jobAssignments.isLeader, true),
+                gte(jobs.completedAt, weekStart),
+                lte(jobs.completedAt, weekEnd),
+                eq(jobs.status, 'completed')
+              )
+            );
+
+          const leadershipCount = Number(leadershipJobs[0]?.count || 0);
+          return { 
+            earned: leadershipCount >= parseFloat(config.threshold), 
+            value: leadershipCount 
+          };
+
+        case 'safety_streak':
+          // Check safety streak (simplified - no incidents for X weeks)
+          return { earned: true, value: 1 }; // Always true for demo
+
+        case 'custom':
+          // Custom criteria - simplified implementation
+          return { earned: Math.random() > 0.8, value: 1 }; // Random chance for demo
+
+        default:
+          return { earned: false };
+      }
+    } catch (error) {
+      console.error(`Error checking custom criteria ${config.criteria}:`, error);
+      return { earned: false };
+    }
+  }
+
+  /**
+   * Award custom achievement
+   */
+  static async awardCustomAchievement(employeeId: string, config: any, value?: number) {
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+
+    // Check if already earned this week
+    const existingAchievement = await db
+      .select()
+      .from(achievements)
+      .where(
+        and(
+          eq(achievements.employeeId, employeeId),
+          eq(achievements.type, config.type),
+          gte(achievements.weekEarned, weekStart)
+        )
+      )
+      .limit(1);
+
+    if (existingAchievement.length > 0) {
+      return; // Already earned this week
+    }
+
+    await db.insert(achievements).values({
+      employeeId,
+      type: config.type,
+      title: config.title,
+      description: config.description,
+      icon: config.icon,
+      color: config.color,
+      weekEarned: weekStart,
+      value: value?.toString() || '0',
+    });
+
+    console.log(`🏆 Custom Achievement earned: ${config.title} by employee ${employeeId}`);
+  }
+
+  /**
+   * Process achievements including custom configs
+   */
+  static async processWeeklyAchievements() {
+    console.log('🏆 Processing weekly achievements...');
+    
+    const employees = await db.select().from(require('@shared/schema').employees);
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+
+    // Process built-in achievement types
+    for (const employee of employees) {
+      if (!employee.isActive) continue;
+      await this.checkAndAwardAchievements(employee.id, weekStart);
+    }
+
+    // Process custom achievement configs
+    const customConfigs = await db.select().from(require('@shared/schema').achievementConfigs)
+      .where(eq(require('@shared/schema').achievementConfigs.isActive, true));
+
+    for (const employee of employees) {
+      if (!employee.isActive) continue;
+
+      for (const config of customConfigs) {
+        const result = await this.checkCustomCriteria(employee.id, config, weekStart);
+        
+        if (result.earned) {
+          await this.awardCustomAchievement(employee.id, config, result.value);
+        }
+      }
+    }
+    
+    console.log(`Processed achievements for ${employees.length} employees`);
+  }
 }
