@@ -228,6 +228,61 @@ export function ProjectTracking() {
     return colors[priority as keyof typeof colors] || colors.normal;
   };
 
+  const editForm = useForm({
+    resolver: zodResolver(insertJobSchema),
+    defaultValues: {
+      jobNumber: '',
+      jobType: 'mowing',
+      category: 'one_day',
+      customerName: '',
+      customerAddress: '',
+      customerPhone: '',
+      budgetedHours: '8.00',
+      laborRevenue: '400.00',
+      materialsCost: '0.00',
+      totalJobValue: '400.00',
+      priority: 'normal',
+      estimatedDuration: 1,
+      isLargejob: false,
+      isSeasonalBonus: false,
+      notes: '',
+    },
+  });
+
+  // Update form values when a job is selected for editing
+  const handleEditJob = (job: Job) => {
+    setSelectedJob(job);
+    editForm.reset({
+      jobNumber: job.jobNumber || '',
+      jobType: job.jobType,
+      category: job.category,
+      customerName: job.customerName,
+      customerAddress: job.customerAddress || '',
+      customerPhone: job.customerPhone || '',
+      budgetedHours: job.budgetedHours?.toString() || '8.00',
+      laborRevenue: job.laborRevenue?.toString() || '400.00',
+      materialsCost: job.materialsCost?.toString() || '0.00',
+      totalJobValue: job.totalJobValue?.toString() || '400.00',
+      priority: job.priority,
+      estimatedDuration: job.estimatedDuration || 1,
+      isLargejob: job.isLargejob || false,
+      isSeasonalBonus: job.isSeasonalBonus || false,
+      notes: job.notes || '',
+    });
+    setEditDialogOpen(true);
+  };
+
+  const onEditSubmit = (data: any) => {
+    if (!selectedJob) return;
+
+    // Clean the data similar to create
+    const cleanedData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
+    );
+
+    updateMutation.mutate({ id: selectedJob.id, data: cleanedData });
+  };
+
   const filteredJobs = (jobs || []).filter((job: any) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'one_day') return job.category === 'one_day';
@@ -600,10 +655,7 @@ export function ProjectTracking() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              setSelectedJob(job);
-                              setEditDialogOpen(true);
-                            }}
+                            onClick={() => handleEditJob(job)}
                           >
                             <Edit className="w-3 h-3 mr-1" />
                             Edit
@@ -668,6 +720,185 @@ export function ProjectTracking() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Job Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Job/Project</DialogTitle>
+            <DialogDescription>
+              Update job details and configuration
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="jobNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="customerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Customer Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Customer or location name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="jobType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="mowing">Mowing</SelectItem>
+                          <SelectItem value="landscaping">Landscaping</SelectItem>
+                          <SelectItem value="maintenance">Maintenance</SelectItem>
+                          <SelectItem value="cleanup">Cleanup</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration Category</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="one_day">One Day</SelectItem>
+                          <SelectItem value="multi_day">Multi Day</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="budgetedHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Budgeted Hours</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="number" step="0.25" placeholder="8.00" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="laborRevenue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Labor Revenue ($)</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="number" step="0.01" placeholder="400.00" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="materialsCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Materials Cost ($)</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="number" step="0.01" placeholder="0.00" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="totalJobValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total Job Value ($)</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="number" step="0.01" placeholder="400.00" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={editForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} placeholder="Additional job details, special instructions, etc." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={updateMutation.isPending}
+                >
+                  {updateMutation.isPending ? 'Updating...' : 'Update Job'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
