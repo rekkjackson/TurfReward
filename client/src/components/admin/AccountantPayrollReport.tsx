@@ -150,30 +150,35 @@ export function AccountantPayrollReport() {
   const totalBonuses = payrollRecords.reduce((sum, record) => sum + record.bonusEarned, 0);
 
   const exportToCSV = () => {
-    const csvContent = [
-      // Header
-      ['Employee', 'Position', 'Total Hours', 'P4P Earnings', 'Hourly Rate', 'Min Wage Due', 'Hourly Supplement', 'Total Pay', 'Bonus Earned'].join(','),
-      // Data rows
-      ...payrollRecords.map(record =>
-        [
-          record.employee.name,
-          record.employee.position,
-          record.totalHours.toFixed(2),
-          record.totalP4P.toFixed(2),
-          record.averageHourlyRate.toFixed(2),
-          record.minimumWageRequired.toFixed(2),
-          record.hourlySupplementNeeded.toFixed(2),
-          record.totalPayDue.toFixed(2),
-          record.bonusEarned.toFixed(2)
-        ].join(',')
-      )
-    ].join('\n');
+    // Simplified CSV export as requested: timeframe, total hours, total pay, bonus
+    const escapeCSV = (field: any) => {
+      const str = String(field);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const headers = ['Employee', 'Pay Period', 'Total Hours', 'Total Pay', 'Bonus (P4P above hourly)'];
+    
+    const csvRows = [
+      headers.map(escapeCSV).join(','),
+      ...payrollRecords.map(record => [
+        escapeCSV(record.employee.name),
+        escapeCSV(payPeriodData?.currentPeriod.periodName || 'Current Period'),
+        escapeCSV(record.totalHours.toFixed(2)),
+        escapeCSV(record.totalPayDue.toFixed(2)),
+        escapeCSV(record.bonusEarned.toFixed(2))
+      ].join(','))
+    ];
+
+    const csvContent = csvRows.join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `payroll-${payPeriodData?.currentPeriod.periodName || 'current'}.csv`;
+    a.download = `Payroll_${payPeriodData?.currentPeriod.periodName?.replace(/\s+/g, '_') || 'Current'}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };

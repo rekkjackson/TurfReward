@@ -1,4 +1,4 @@
-import { Trophy, Medal, Star, Clock, Handshake } from 'lucide-react';
+import { Trophy, Medal, Star, Clock, Handshake, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface TopPerformerSpotlightProps {
@@ -10,6 +10,7 @@ interface TopPerformerSpotlightProps {
     weeklyRevenue?: number;
     performancePay?: number;
     hourlyRate?: number;
+    hoursWorked?: number;
   } | null;
 }
 
@@ -99,10 +100,10 @@ export function TopPerformerSpotlight({ performer }: TopPerformerSpotlightProps)
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          <Clock className="text-primary text-lg" />
+          <DollarSign className="text-primary text-lg" />
           <div>
-            <div className="text-sm font-semibold">Zero Late Days</div>
-            <div className="text-xs text-gray-400">Perfect attendance this month</div>
+            <div className="text-sm font-semibold">${performer.hourlyRate?.toFixed(2) || '0'}/hour</div>
+            <div className="text-xs text-gray-400">Current P4P rate</div>
           </div>
         </motion.div>
         <motion.div 
@@ -111,10 +112,10 @@ export function TopPerformerSpotlight({ performer }: TopPerformerSpotlightProps)
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          <Handshake className="text-warning text-lg" />
+          <Clock className="text-primary text-lg" />
           <div>
-            <div className="text-sm font-semibold">Customer Champion</div>
-            <div className="text-xs text-gray-400">3 referrals this quarter</div>
+            <div className="text-sm font-semibold">{performer.hoursWorked?.toFixed(1) || '0'} Hours</div>
+            <div className="text-xs text-gray-400">Total hours worked</div>
           </div>
         </motion.div>
       </div>

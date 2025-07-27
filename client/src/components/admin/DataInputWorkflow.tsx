@@ -13,9 +13,11 @@ import {
   PauseCircle,
   AlertTriangle
 } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
 
 export function DataInputWorkflow() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [location, setLocation] = useLocation();
 
   const workflowSteps = [
     {
@@ -23,24 +25,28 @@ export function DataInputWorkflow() {
       description: "Set up mowing routes or landscaping projects with budgeted hours and revenue",
       status: "completed",
       action: "Go to Projects tab",
+      link: "projects"
     },
     {
       title: "2. Assign Team Members",
       description: "Add employees to jobs with roles (leader, training) and track actual hours worked",
       status: "in_progress",
       action: "Go to Job Tracking tab",
+      link: "assignments"
     },
     {
       title: "3. Track Performance",
       description: "System auto-calculates P4P based on efficiency, bonuses, and company policies",
       status: "pending",
       action: "View Dashboard",
+      link: "/"
     },
     {
       title: "4. Record Quality Issues",
       description: "Log yellow slips, property damage, and equipment issues that affect pay",
       status: "pending", 
       action: "Go to Incidents tab",
+      link: "incidents"
     },
   ];
 
@@ -140,12 +146,35 @@ export function DataInputWorkflow() {
                           <p className="text-sm text-muted-foreground">{step.description}</p>
                         </div>
                       </div>
-                      <Button 
-                        variant={step.status === 'in_progress' ? 'default' : 'outline'}
-                        size="sm"
-                      >
-                        {step.action}
-                      </Button>
+                      {step.link === '/' ? (
+                        <Link href="/">
+                          <Button 
+                            variant={step.status === 'in_progress' ? 'default' : 'outline'}
+                            size="sm"
+                          >
+                            {step.action}
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Button 
+                          variant={step.status === 'in_progress' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            // Navigate to the correct admin tab
+                            const adminUrl = `/admin`;
+                            setLocation(adminUrl);
+                            // Use setTimeout to allow navigation, then trigger tab change
+                            setTimeout(() => {
+                              const tabTrigger = document.querySelector(`[value="${step.link}"]`) as HTMLElement;
+                              if (tabTrigger) {
+                                tabTrigger.click();
+                              }
+                            }, 100);
+                          }}
+                        >
+                          {step.action}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -160,6 +189,11 @@ export function DataInputWorkflow() {
                   <li>4. Log any quality issues or damage in Incidents tab</li>
                   <li>5. Complete job when finished to finalize all calculations</li>
                 </ol>
+                <div className="mt-4 p-3 bg-green-100 rounded border-l-4 border-green-500">
+                  <p className="text-sm text-green-800">
+                    ✅ <strong>Test data cleared!</strong> System ready for fresh data input.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

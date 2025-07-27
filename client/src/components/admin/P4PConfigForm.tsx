@@ -27,10 +27,11 @@ export function P4PConfigForm() {
       jobType: '',
       laborRevenuePercentage: '33.00',
       seasonalBonus: '7.00',
-      minimumHourlyRate: '18.00',
+      minimumHourlyRate: '23.00',
       trainingBonusPerHour: '4.00',
       largejobBonusThreshold: 49,
       largejobBonusPerHour: '1.50',
+      dailyRevenueGoal: '6500.00',
       isActive: true,
     },
   });
@@ -73,10 +74,11 @@ export function P4PConfigForm() {
       jobType: config.jobType,
       laborRevenuePercentage: config.laborRevenuePercentage || '33.00',
       seasonalBonus: config.seasonalBonus || '0.00',
-      minimumHourlyRate: config.minimumHourlyRate || '18.00',
-      trainingBonusPerHour: config.trainingBonusPerHour,
+      minimumHourlyRate: config.minimumHourlyRate || '23.00',
+      trainingBonusPerHour: config.trainingBonusPerHour || '4.00',
       largejobBonusThreshold: config.largejobBonusThreshold || 49,
-      largejobBonusPerHour: config.largejobBonusPerHour,
+      largejobBonusPerHour: config.largejobBonusPerHour || '1.50',
+      dailyRevenueGoal: config.dailyRevenueGoal || '6500.00',
       isActive: config.isActive ?? true,
     });
   };
@@ -97,7 +99,7 @@ export function P4PConfigForm() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {configs && configs.map((config: P4PConfig) => (
+            {configs && Array.isArray(configs) && (configs as P4PConfig[]).map((config: P4PConfig) => (
               <div
                 key={config.id}
                 className="p-4 border rounded-lg cursor-pointer hover:bg-accent"
@@ -112,6 +114,11 @@ export function P4PConfigForm() {
                     <p className="text-sm text-muted-foreground">
                       Min: ${config.minimumHourlyRate}/hr
                     </p>
+                    {config.dailyRevenueGoal && (
+                      <p className="text-sm text-muted-foreground">
+                        Goal: ${config.dailyRevenueGoal}/day
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className={`inline-block px-2 py-1 rounded text-xs ${
@@ -259,6 +266,23 @@ export function P4PConfigForm() {
                     </FormControl>
                     <FormDescription>
                       Bonus per budgeted hour for large jobs ($1.50/hr)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="dailyRevenueGoal"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Daily Revenue Goal ($)</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="number" step="0.01" />
+                    </FormControl>
+                    <FormDescription>
+                      Company-wide daily revenue target for dashboard display
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

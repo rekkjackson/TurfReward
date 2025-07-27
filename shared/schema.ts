@@ -19,10 +19,11 @@ export const p4pConfigs = pgTable("p4p_configs", {
   jobType: text("job_type").notNull(), // 'mowing', 'landscaping', 'maintenance'
   laborRevenuePercentage: decimal("labor_revenue_percentage", { precision: 5, scale: 2 }).notNull(),
   seasonalBonus: decimal("seasonal_bonus", { precision: 5, scale: 2 }).default("0.00"), // March-May bonus
-  minimumHourlyRate: decimal("minimum_hourly_rate", { precision: 10, scale: 2 }).default("18.00"),
+  minimumHourlyRate: decimal("minimum_hourly_rate", { precision: 10, scale: 2 }).default("23.00"),
   trainingBonusPerHour: decimal("training_bonus_per_hour", { precision: 10, scale: 2 }).default("4.00"),
   largejobBonusThreshold: integer("largejob_bonus_threshold").default(49), // hours
   largejobBonusPerHour: decimal("largejob_bonus_per_hour", { precision: 10, scale: 2 }).default("1.50"),
+  dailyRevenueGoal: decimal("daily_revenue_goal", { precision: 10, scale: 2 }).default("6500.00"),
   isActive: boolean("is_active").default(true),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
