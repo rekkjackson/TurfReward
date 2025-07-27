@@ -8,14 +8,14 @@ This is a comprehensive Pay-for-Performance (P4P) dashboard application for a la
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (Updated: July 26, 2025)
+## Recent Changes (Updated: July 27, 2025)
 
-✓ **P4P Calculation Engine Operational**: Fixed critical $0.00 P4P calculations by adding missing job type configurations and automatic calculation triggers
-✓ **100% Regulatory Compliance Verified**: P4P system meets all business rules with $264 P4P payments ($44/hr equivalent) for cleanup jobs
-✓ **Job Creation Schema Fix**: Resolved 400 error by making customer fields optional for maintenance/internal jobs
-✓ **Enterprise-Grade Testing Complete**: 90.92% success rate on 5,000-request stress test plus 100% functional test compliance
-✓ **Real-Time Payroll Dashboard**: Live P4P vs hourly compensation tracking with accurate pay period calculations
-✓ **Military/Enterprise Quality Standards**: System validated for high-concurrency production deployment
+✓ **Dashboard Redesigned for Company-Wide View**: Monthly revenue thermometer ($200K goals), company metrics (yellow slips, damage cases, reviews, estimates), work type breakdown (maintenance vs landscaping vs mowing vs cleanup)
+✓ **Pay Period Contingency for Projects**: Multi-day projects spanning pay periods receive hourly payments until completion, then full P4P calculation applied retroactively
+✓ **Top Performer Spotlight Redesigned**: Company-wide focus with team statistics when no individual leader available
+✓ **Monthly Revenue Tracking**: Replaced daily goals with monthly progression tracking for better business planning
+✓ **Work Type Analytics**: Comprehensive breakdown of maintenance vs landscaping operations with efficiency metrics
+✓ **Project-Specific Contingency**: One-day jobs (mowing) unaffected, only multi-day projects use contingency system
 
 ## System Architecture
 
@@ -94,8 +94,9 @@ The system now handles both one-day jobs (mowing routes) and multi-day projects 
 5. **Job Completion**: Final calculations performed when job status set to completed
 
 #### Job Categories:
-- **One-Day Jobs**: Mowing routes, maintenance - immediate completion tracking
-- **Multi-Day Projects**: Landscaping, cleanups - span multiple days with progress tracking
+- **One-Day Jobs**: Mowing routes, maintenance - immediate completion tracking, normal P4P calculations
+- **Multi-Day Projects**: Landscaping, cleanups - span multiple days with progress tracking and pay period contingency
+- **Pay Period Contingency**: Projects spanning multiple pay periods receive hourly pay until completion, then full P4P applied
 - **Large Job Bonuses**: Automatically calculated for jobs 49+ budgeted hours
 
 #### P4P Calculation Rules (from business document):

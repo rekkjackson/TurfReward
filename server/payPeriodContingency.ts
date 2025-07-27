@@ -4,24 +4,30 @@ import { eq, and, gte, lte } from 'drizzle-orm';
 import { getCurrentPayPeriod } from '@shared/payPeriodUtils';
 
 /**
- * Pay Period Contingency System
+ * Pay Period Contingency System - Projects Only
  * 
- * When multi-day projects span across pay periods (e.g., 26-10 to 11-25):
+ * When multi-day PROJECTS (landscaping, cleanups) span across pay periods:
  * 1. Employees receive hourly pay for work done until project completion
  * 2. Once project is completed, full P4P calculation is applied retroactively
- * 3. Adjustments are made to ensure proper compensation
+ * 3. One-day jobs (mowing routes) are not affected - they complete same day
+ * 4. Only applies to jobs with category "multi_day" that cross pay period boundaries
  */
 
 export class PayPeriodContingencyService {
   
   /**
-   * Check if a job spans multiple pay periods
+   * Check if a PROJECT spans multiple pay periods
+   * Only applies to multi-day projects (landscaping, cleanups), not one-day jobs
    */
-  static async checkJobSpansPayPeriods(jobId: string): Promise<boolean> {
+  static async checkProjectSpansPayPeriods(jobId: string): Promise<boolean> {
     const job = await db.select().from(jobs).where(eq(jobs.id, jobId)).limit(1);
     if (!job.length) return false;
     
     const jobData = job[0];
+    
+    // Only check multi-day projects
+    if (jobData.category !== 'multi_day') return false;
+    
     if (!jobData.startDate || !jobData.endDate) return false;
     
     const startPeriod = getCurrentPayPeriod(jobData.startDate);
@@ -31,14 +37,16 @@ export class PayPeriodContingencyService {
   }
   
   /**
-   * Process hourly payments for multi-period projects
+   * Process hourly payments for multi-period PROJECTS only
    */
-  static async processHourlyPayments(jobId: string): Promise<void> {
-    const spansPayPeriods = await this.checkJobSpansPayPeriods(jobId);
+  static async processProjectHourlyPayments(jobId: string): Promise<void> {
+    const spansPayPeriods = await this.checkProjectSpansPayPeriods(jobId);
     
     if (!spansPayPeriods) return;
     
-    // Mark job as spanning pay periods
+    console.log(`Project ${jobId} spans pay periods - applying contingency payments`);
+    
+    // Mark project as spanning pay periods
     await db.update(jobs)
       .set({ spansPayPeriods: true })
       .where(eq(jobs.id, jobId));
@@ -159,7 +167,7 @@ export class PayPeriodContingencyService {
           })
           .where(eq(jobAssignments.id, assignment.id));
         
-        console.log(`Final P4P for ${assignment.employeeId}: $${finalP4P.toFixed(2)} (adjustment: $${adjustment.toFixed(2)})`);
+        console.log(`Project ${jobId} - Final P4P for ${assignment.employeeId}: $${finalP4P.toFixed(2)} (adjustment: $${adjustment.toFixed(2)})`);
       }
     }
   }
