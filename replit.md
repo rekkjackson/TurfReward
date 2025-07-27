@@ -10,13 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Updated: July 27, 2025)
 
-✓ **P4P Calculation Engine Fixed**: Fully functional automated calculations showing Derek Jackson $1148 total P4P at $63.78/hr, Christine Johnstone $280.50 at $46.75/hr
-✓ **Real Database Integration**: All calculations now use authentic data - $2100+ daily revenue from completed jobs, real incident tracking for reviews/estimates
-✓ **Automatic P4P Triggers**: Job assignment creation automatically calculates and updates performance pay values
-✓ **Monthly Revenue Goal Corrected**: Proper $200K monthly target with accurate daily revenue tracking from completed jobs
-✓ **Company Efficiency Metrics**: Live calculation showing 138% efficiency from real job assignment data
-✓ **Job Completion Error Fixed**: Date formatting issue resolved for completing jobs through admin interface
-✓ **Multi-Employee Support**: Dashboard now properly displays multiple employees with individual P4P calculations and efficiency scores
+✓ **Dashboard Display Fixed**: Completed jobs count now includes all job types (mowing, landscaping, maintenance, cleanup)
+✓ **Weather Display**: Changed to Celsius (25°C) per user preference instead of Fahrenheit
+✓ **Incident Management**: Added delete functionality with trash icons on incident cards
+✓ **Monthly Revenue Thermometer**: Fixed to show actual revenue ($2400) instead of $0
+✓ **P4P System Enhancement**: Added cleanup job configuration for proper performance pay calculations
+✓ **Zero State Handling**: Dashboard now correctly shows 0 for incidents/reviews when all deleted (no fallback values)
+✓ **Hour Tracking Clarification**: System tracks jobsite work hours (not clock time) for P4P and base pay calculations
 
 ## System Architecture
 
