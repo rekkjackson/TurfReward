@@ -100,6 +100,8 @@ export const companyMetrics = pgTable("company_metrics", {
   date: timestamp("date").notNull(),
   dailyRevenue: decimal("daily_revenue", { precision: 10, scale: 2 }).default("0.00"),
   dailyRevenueGoal: decimal("daily_revenue_goal", { precision: 10, scale: 2 }).default("6500.00"),
+  monthlyRevenue: decimal("monthly_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  monthlyRevenueGoal: decimal("monthly_revenue_goal", { precision: 10, scale: 2 }).default("15000.00"),
   jobsCompleted: integer("jobs_completed").default(0),
   mowingJobsCompleted: integer("mowing_jobs_completed").default(0),
   landscapingJobsCompleted: integer("landscaping_jobs_completed").default(0),

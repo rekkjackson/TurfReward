@@ -365,12 +365,13 @@ export class DatabaseStorage implements IStorage {
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
     const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
     const monthlyCompletedJobs = completedJobs.filter(job => 
-      job.status === 'completed' && 
-      job.completedAt && 
-      new Date(job.completedAt) >= monthStart && 
-      new Date(job.completedAt) <= monthEnd
+      job.status === 'completed' && (
+        (job.completedAt && new Date(job.completedAt) >= monthStart && new Date(job.completedAt) <= monthEnd) ||
+        (!job.completedAt && job.updatedAt && new Date(job.updatedAt) >= monthStart && new Date(job.updatedAt) <= monthEnd)
+      )
     );
     const monthlyRevenue = monthlyCompletedJobs.reduce((sum, job) => sum + parseFloat(job.laborRevenue || '0'), 0);
+    console.log(`Monthly revenue calculation: ${monthlyCompletedJobs.length} jobs, $${monthlyRevenue} total`);
     
     // console.log(`Revenue calculation: ${completedJobsFiltered.length} completed jobs, $${dailyRevenue} total revenue`);
     
@@ -451,6 +452,8 @@ export class DatabaseStorage implements IStorage {
     effectiveMetrics.mowingAverageEfficiency = companyEfficiency;
     effectiveMetrics.overallEfficiency = companyEfficiency;
     effectiveMetrics.id = 'live-calculated';
+    
+    console.log(`Final metrics: daily=$${dailyRevenue}, monthly=$${monthlyRevenue}`);
 
     // Get week start for weekly calculations
     const weekStart = new Date(today);

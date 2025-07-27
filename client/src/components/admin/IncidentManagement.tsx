@@ -73,7 +73,13 @@ export function IncidentManagement() {
       case 'yellow_slip':
         return <AlertTriangle className="w-5 h-5 text-warning" />;
       case 'property_damage':
-        return <AlertCircle className="w-5 h-5 text-danger" />;
+        return <AlertCircle className="w-5 h-5 text-destructive" />;
+      case 'equipment_damage':
+        return <Wrench className="w-5 h-5 text-orange-500" />;
+      case 'customer_review':
+        return <AlertTriangle className="w-5 h-5 text-blue-500" />;
+      case 'estimate_completed':
+        return <AlertTriangle className="w-5 h-5 text-green-500" />;
       case 'quality_issue':
         return <AlertTriangle className="w-5 h-5 text-primary" />;
       default:
@@ -187,8 +193,10 @@ export function IncidentManagement() {
                         <SelectContent>
                           <SelectItem value="yellow_slip">Yellow Slip - Quality Issue</SelectItem>
                           <SelectItem value="property_damage">Property Damage</SelectItem>
-                          <SelectItem value="quality_issue">Quality Issue</SelectItem>
                           <SelectItem value="equipment_damage">Equipment Damage</SelectItem>
+                          <SelectItem value="customer_review">Customer Review</SelectItem>
+                          <SelectItem value="estimate_completed">Estimate Completed</SelectItem>
+                          <SelectItem value="quality_issue">Quality Issue</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
