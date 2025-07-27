@@ -539,11 +539,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/achievements/process", async (req, res) => {
     try {
+      console.log('🏆 Starting achievement processing...');
       await AchievementEngine.processWeeklyAchievements();
+      console.log('✅ Achievement processing completed successfully');
       res.json({ message: "Achievements processed successfully" });
     } catch (error) {
-      console.error('Error processing achievements:', error);
-      res.status(500).json({ message: "Failed to process achievements" });
+      console.error('❌ Error processing achievements:', error);
+      console.error('Full error stack:', error.stack);
+      res.status(500).json({ message: "Failed to process achievements", error: error.message });
     }
   });
 
