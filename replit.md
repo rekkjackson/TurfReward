@@ -10,13 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Updated: July 27, 2025)
 
-✓ **Dashboard Display Fixed**: Completed jobs count now includes all job types (mowing, landscaping, maintenance, cleanup)
-✓ **Weather Display**: Changed to Celsius (25°C) per user preference instead of Fahrenheit
-✓ **Incident Management**: Added delete functionality with trash icons on incident cards
-✓ **Monthly Revenue Thermometer**: Fixed to show actual revenue ($2400) instead of $0
+✓ **Job Editing Fixed**: Complete edit dialog implemented with all form fields for modifying job details
+✓ **Dual Hour Tracking System**: Separate tracking for total hours (base pay) vs jobsite hours (P4P calculations)
+✓ **Base Pay Structure**: Total hours include travel/lunch time for fair base wage compensation
+✓ **P4P Calculation Enhancement**: Performance pay now calculated using productive jobsite hours only
+✓ **Database Schema Updated**: Added jobsite_hours column to job_assignments table
+✓ **UI Enhancement**: Job assignment form now shows both hour types with clear descriptions
 ✓ **P4P System Enhancement**: Added cleanup job configuration for proper performance pay calculations
-✓ **Zero State Handling**: Dashboard now correctly shows 0 for incidents/reviews when all deleted (no fallback values)
-✓ **Hour Tracking Clarification**: System tracks jobsite work hours (not clock time) for P4P and base pay calculations
 
 ## System Architecture
 

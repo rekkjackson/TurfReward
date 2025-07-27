@@ -10,7 +10,7 @@ interface P4PCalculationResult {
     laborRevenue: number;
     revenuePercentage: number;
     teamSize: number;
-    hoursWorked: number;
+    jobsiteHours: number;
     baseCalculation: number;
     trainingBonus: number;
     largejobBonus: number;
@@ -66,12 +66,13 @@ export class P4PCalculationEngine {
         .where(eq(jobAssignments.jobId, assignment.job.id));
 
       const teamSize = teamAssignments.length;
-      const hoursWorked = parseFloat(assignment.assignment.hoursWorked || '0');
+      const totalHours = parseFloat(assignment.assignment.hoursWorked || '0'); // For base pay calculations
+      const jobsiteHours = parseFloat(assignment.assignment.jobsiteHours || '0'); // For P4P calculations
       const laborRevenue = parseFloat(assignment.job.laborRevenue || '0');
       const budgetedHours = parseFloat(assignment.job.budgetedHours || '0');
 
-      if (hoursWorked === 0) {
-        console.warn(`No hours worked for assignment: ${assignmentId}`);
+      if (jobsiteHours === 0) {
+        console.warn(`No jobsite hours worked for assignment: ${assignmentId}`);
         return null;
       }
 
@@ -89,9 +90,9 @@ export class P4PCalculationEngine {
       const baseCalculation = (laborRevenue * revenuePercentage) / teamSize;
       console.log(`  Base Calculation: $${baseCalculation.toFixed(2)}`);
       
-      // Training bonus: $4/hour if isTraining = true
+      // Training bonus: $4/hour if isTraining = true (based on jobsite hours)
       const trainingBonus = assignment.assignment.isTraining ? 
-        (hoursWorked * parseFloat(p4pConfig.trainingBonusPerHour || '4')) : 0;
+        (jobsiteHours * parseFloat(p4pConfig.trainingBonusPerHour || '4')) : 0;
       
       // Large job bonus: $1.50/budgeted hour for 49+ hour jobs
       const largejobBonus = budgetedHours >= parseFloat(p4pConfig.largejobBonusThreshold?.toString() || '49') ?
@@ -122,14 +123,14 @@ export class P4PCalculationEngine {
       // Total P4P with incident adjustments
       let totalP4P = baseCalculation + trainingBonus + largejobBonus + seasonalBonus + estimateReviewBonuses - incidentDeductions;
       
-      // Minimum wage protection: Use config minimum hourly rate
+      // Minimum wage protection: Use config minimum hourly rate (based on total hours for base pay)
       const minimumHourly = parseFloat(p4pConfig.minimumHourlyRate || '23');
-      const minimumPay = hoursWorked * minimumHourly;
+      const minimumPay = totalHours * minimumHourly;
       const minimumWageGap = Math.max(0, minimumPay - totalP4P);
       
       // Final P4P amount (minimum wage is handled separately in payroll)
       const finalP4P = totalP4P;
-      const hourlyEquivalent = finalP4P / hoursWorked;
+      const hourlyEquivalent = finalP4P / jobsiteHours; // P4P efficiency based on productive hours
 
       return {
         assignmentId,
@@ -139,7 +140,7 @@ export class P4PCalculationEngine {
           laborRevenue,
           revenuePercentage: revenuePercentage * 100,
           teamSize,
-          hoursWorked,
+          jobsiteHours,
           baseCalculation,
           trainingBonus,
           largejobBonus,

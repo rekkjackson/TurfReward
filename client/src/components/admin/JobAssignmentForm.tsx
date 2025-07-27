@@ -37,6 +37,7 @@ export function JobAssignmentForm() {
     defaultValues: {
       employeeId: '',
       hoursWorked: '8.00',
+      jobsiteHours: '6.00',
       isLeader: false,
       isTraining: false,
     },
@@ -51,6 +52,7 @@ export function JobAssignmentForm() {
       form.reset({
         employeeId: '',
         hoursWorked: '8.00',
+        jobsiteHours: '6.00',
         isLeader: false,
         isTraining: false,
       });
@@ -265,22 +267,41 @@ export function JobAssignmentForm() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="hoursWorked"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Hours Worked</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" step="0.25" placeholder="8.00" />
-                        </FormControl>
-                        <FormDescription>
-                          Actual hours worked on this job
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="hoursWorked"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Total Hours</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.25" placeholder="8.00" />
+                          </FormControl>
+                          <FormDescription>
+                            Total hours including travel/lunch (base pay)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="jobsiteHours"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Jobsite Hours</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.25" placeholder="6.00" />
+                          </FormControl>
+                          <FormDescription>
+                            Productive work hours (P4P calculation)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
@@ -372,7 +393,7 @@ export function JobAssignmentForm() {
                         <div className="font-medium">{employee?.name}</div>
                         <div className="text-sm text-muted-foreground flex items-center space-x-2">
                           <Clock className="w-3 h-3" />
-                          <span>{assignment.hoursWorked}h worked</span>
+                          <span>{assignment.hoursWorked}h total ({assignment.jobsiteHours || 'N/A'}h jobsite)</span>
                           {assignment.isLeader && (
                             <Badge variant="outline">Leader</Badge>
                           )}

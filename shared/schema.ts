@@ -59,7 +59,8 @@ export const jobAssignments = pgTable("job_assignments", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   jobId: uuid("job_id").references(() => jobs.id).notNull(),
   employeeId: uuid("employee_id").references(() => employees.id).notNull(),
-  hoursWorked: decimal("hours_worked", { precision: 10, scale: 2 }),
+  hoursWorked: decimal("hours_worked", { precision: 10, scale: 2 }), // Total hours including travel/lunch for base pay
+  jobsiteHours: decimal("jobsite_hours", { precision: 10, scale: 2 }), // Productive hours for P4P calculation
   isLeader: boolean("is_leader").default(false),
   isTraining: boolean("is_training").default(false),
   performancePay: decimal("performance_pay", { precision: 10, scale: 2 }).default("0.00"),
