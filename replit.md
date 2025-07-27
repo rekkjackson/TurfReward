@@ -10,13 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Updated: July 27, 2025)
 
+✓ **Variable Base Rate System**: Minimum wage protection now uses each employee's individual base hourly rate
+✓ **Individual Compensation Logic**: Higher-paid employees get higher minimum protection, lower-paid get lower minimums
 ✓ **P4P Completion Logic Fixed**: Performance pay now only calculated when jobs are marked "completed"
 ✓ **P4P Reset Mechanism**: Automatically resets P4P to $0 when jobs are uncompleted (pending/in_progress)
 ✓ **Dual Hour Tracking System**: Separate tracking for total hours (base pay) vs jobsite hours (P4P calculations)
-✓ **Base Pay Structure**: Total hours include travel/lunch time for fair base wage compensation
 ✓ **Job Status-Based P4P**: P4P calculation triggered by job completion status changes
-✓ **Database Schema Updated**: Added jobsite_hours column to job_assignments table
-✓ **UI Enhancement**: Job assignment form now shows both hour types with clear descriptions
+✓ **Individual Rate Protection**: Derek ($25/hour) vs Christine ($20/hour) get different minimum calculations
 
 ## System Architecture
 

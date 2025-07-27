@@ -146,10 +146,13 @@ export class P4PCalculationEngine {
       // Total P4P with incident adjustments
       let totalP4P = baseCalculation + trainingBonus + largejobBonus + seasonalBonus + estimateReviewBonuses - incidentDeductions;
       
-      // Minimum wage protection: Use config minimum hourly rate (based on total hours for base pay)
-      const minimumHourly = parseFloat(p4pConfig.minimumHourlyRate || '23');
-      const minimumPay = totalHours * minimumHourly;
+      // Minimum wage protection: Use employee's individual base hourly rate (based on total hours for base pay)
+      const employeeBaseRate = parseFloat(assignment.employee.baseHourlyRate || '18.00');
+      const minimumPay = totalHours * employeeBaseRate;
       const minimumWageGap = Math.max(0, minimumPay - totalP4P);
+      
+      console.log(`  Employee Base Rate: $${employeeBaseRate}/hour`);
+      console.log(`  Minimum Pay (${totalHours}h × $${employeeBaseRate}): $${minimumPay.toFixed(2)}`);
       
       // Final P4P amount (minimum wage is handled separately in payroll)
       const finalP4P = totalP4P;
