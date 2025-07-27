@@ -9,8 +9,11 @@ import {
   insertJobAssignmentSchema,
   insertPerformanceMetricSchema,
   insertIncidentSchema,
-  insertCompanyMetricSchema
+  insertCompanyMetricSchema,
+  insertAchievementSchema
 } from "@shared/schema";
+
+import { AchievementEngine } from "./achievementEngine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Employee routes
@@ -509,6 +512,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Delete job error:', error);
       res.status(500).json({ message: "Failed to delete job" });
+    }
+  });
+
+  // Achievement routes
+  app.get("/api/achievements", async (req, res) => {
+    try {
+      const achievements = await AchievementEngine.getAllRecentAchievements(10);
+      res.json(achievements);
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  app.get("/api/achievements/employee/:employeeId", async (req, res) => {
+    try {
+      const achievements = await AchievementEngine.getEmployeeAchievements(req.params.employeeId);
+      res.json(achievements);
+    } catch (error) {
+      console.error('Error fetching employee achievements:', error);
+      res.status(500).json({ message: "Failed to fetch employee achievements" });
+    }
+  });
+
+  app.post("/api/achievements/process", async (req, res) => {
+    try {
+      await AchievementEngine.processWeeklyAchievements();
+      res.json({ message: "Achievements processed successfully" });
+    } catch (error) {
+      console.error('Error processing achievements:', error);
+      res.status(500).json({ message: "Failed to process achievements" });
     }
   });
 

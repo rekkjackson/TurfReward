@@ -136,9 +136,29 @@ export const jobAssignmentsRelations = relations(jobAssignments, ({ one }) => ({
   }),
 }));
 
+export const achievements = pgTable("achievements", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  employeeId: uuid("employee_id").references(() => employees.id).notNull(),
+  type: text("type").notNull(), // 'efficiency_master', 'revenue_champion', 'consistency_pro', 'safety_star', 'team_leader'
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(), // lucide icon name
+  color: text("color").notNull(), // badge color class
+  earnedAt: timestamp("earned_at").defaultNow(),
+  weekEarned: timestamp("week_earned"), // Week this achievement was earned
+  value: decimal("value", { precision: 10, scale: 2 }), // Associated value (efficiency %, revenue amount, etc.)
+});
+
 export const performanceMetricsRelations = relations(performanceMetrics, ({ one }) => ({
   employee: one(employees, {
     fields: [performanceMetrics.employeeId],
+    references: [employees.id],
+  }),
+}));
+
+export const achievementsRelations = relations(achievements, ({ one }) => ({
+  employee: one(employees, {
+    fields: [achievements.employeeId],
     references: [employees.id],
   }),
 }));
@@ -192,6 +212,11 @@ export const insertCompanyMetricSchema = createInsertSchema(companyMetrics).omit
   id: true,
 });
 
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  earnedAt: true,
+});
+
 // Types
 export type Employee = typeof employees.$inferSelect;
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
@@ -213,3 +238,6 @@ export type InsertIncident = z.infer<typeof insertIncidentSchema>;
 
 export type CompanyMetric = typeof companyMetrics.$inferSelect;
 export type InsertCompanyMetric = z.infer<typeof insertCompanyMetricSchema>;
+
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;

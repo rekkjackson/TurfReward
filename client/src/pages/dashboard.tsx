@@ -10,6 +10,7 @@ import { GoalsMetricsZone } from '@/components/dashboard/GoalsMetricsZone';
 import { DamageCasesTracker } from '@/components/dashboard/DamageCasesTracker';
 import { PayPeriodVisualization } from '@/components/dashboard/PayPeriodVisualization';
 import { CompactPayPeriodWidget } from '@/components/dashboard/CompactPayPeriodWidget';
+import { AchievementBadges } from '@/components/dashboard/AchievementBadges';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Loader2, WifiOff, Settings } from 'lucide-react';
 import { Link } from 'wouter';
@@ -148,6 +149,9 @@ export default function Dashboard() {
               }}
             />
           </div>
+
+          {/* Achievement Badges */}
+          <AchievementBadges />
 
           {/* Employee Performance Grid */}
           <EmployeePerformanceGrid employees={employeePerformance} />
