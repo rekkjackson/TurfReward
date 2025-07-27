@@ -149,6 +149,20 @@ export const achievements = pgTable("achievements", {
   value: decimal("value", { precision: 10, scale: 2 }), // Associated value (efficiency %, revenue amount, etc.)
 });
 
+export const achievementConfigs = pgTable("achievement_configs", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  color: text("color").notNull(),
+  criteria: text("criteria").notNull(),
+  threshold: decimal("threshold", { precision: 10, scale: 2 }).default("0"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const performanceMetricsRelations = relations(performanceMetrics, ({ one }) => ({
   employee: one(employees, {
     fields: [performanceMetrics.employeeId],
@@ -217,6 +231,12 @@ export const insertAchievementSchema = createInsertSchema(achievements).omit({
   earnedAt: true,
 });
 
+export const insertAchievementConfigSchema = createInsertSchema(achievementConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type Employee = typeof employees.$inferSelect;
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
@@ -241,3 +261,6 @@ export type InsertCompanyMetric = z.infer<typeof insertCompanyMetricSchema>;
 
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+
+export type AchievementConfig = typeof achievementConfigs.$inferSelect;
+export type InsertAchievementConfig = z.infer<typeof insertAchievementConfigSchema>;

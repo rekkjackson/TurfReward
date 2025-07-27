@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { P4PConfigForm } from '@/components/admin/P4PConfigForm';
 import { EmployeeManagement } from '@/components/admin/EmployeeManagement';
 import { IncidentManagement } from '@/components/admin/IncidentManagement';
+import { AchievementManagement } from '@/components/admin/AchievementManagement';
 import { ProjectTracking } from '@/components/admin/ProjectTracking';
 import { JobAssignmentForm } from '@/components/admin/JobAssignmentForm';
 import { DataInputWorkflow } from '@/components/admin/DataInputWorkflow';
@@ -33,7 +34,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="workflow" className="w-full">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="workflow" className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4" />
               <span>Workflow</span>
@@ -61,6 +62,10 @@ export default function Admin() {
             <TabsTrigger value="incidents" className="flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4" />
               <span>Incidents</span>
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="flex items-center space-x-2">
+              <Settings className="w-4 h-4" />
+              <span>Achievements</span>
             </TabsTrigger>
             <TabsTrigger value="p4p-config" className="flex items-center space-x-2">
               <Settings className="w-4 h-4" />
@@ -154,6 +159,10 @@ export default function Admin() {
                 <IncidentManagement />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="achievements">
+            <AchievementManagement />
           </TabsContent>
         </Tabs>
       </div>

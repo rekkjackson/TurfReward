@@ -10,7 +10,8 @@ import {
   insertPerformanceMetricSchema,
   insertIncidentSchema,
   insertCompanyMetricSchema,
-  insertAchievementSchema
+  insertAchievementSchema,
+  insertAchievementConfigSchema
 } from "@shared/schema";
 
 import { AchievementEngine } from "./achievementEngine";
@@ -543,6 +544,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error processing achievements:', error);
       res.status(500).json({ message: "Failed to process achievements" });
+    }
+  });
+
+  // Achievement Config routes
+  app.get("/api/achievement-configs", async (req, res) => {
+    try {
+      const configs = await storage.getAchievementConfigs();
+      res.json(configs);
+    } catch (error) {
+      console.error('Error fetching achievement configs:', error);
+      res.status(500).json({ message: "Failed to fetch achievement configs" });
+    }
+  });
+
+  app.post("/api/achievement-configs", async (req, res) => {
+    try {
+      const validatedData = insertAchievementConfigSchema.parse(req.body);
+      const config = await storage.createAchievementConfig(validatedData);
+      res.status(201).json(config);
+    } catch (error) {
+      console.error('Error creating achievement config:', error);
+      res.status(400).json({ message: "Invalid achievement config data" });
+    }
+  });
+
+  app.patch("/api/achievement-configs/:id", async (req, res) => {
+    try {
+      const partialData = insertAchievementConfigSchema.partial().parse(req.body);
+      const config = await storage.updateAchievementConfig(req.params.id, partialData);
+      res.json(config);
+    } catch (error) {
+      console.error('Error updating achievement config:', error);
+      res.status(400).json({ message: "Invalid achievement config update data" });
+    }
+  });
+
+  app.delete("/api/achievement-configs/:id", async (req, res) => {
+    try {
+      await storage.deleteAchievementConfig(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting achievement config:', error);
+      res.status(500).json({ message: "Failed to delete achievement config" });
     }
   });
 

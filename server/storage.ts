@@ -6,6 +6,7 @@ import {
   performanceMetrics,
   incidents,
   companyMetrics,
+  achievementConfigs,
   type Employee,
   type InsertEmployee,
   type P4PConfig,
@@ -20,6 +21,8 @@ import {
   type InsertIncident,
   type CompanyMetric,
   type InsertCompanyMetric,
+  type AchievementConfig,
+  type InsertAchievementConfig,
 } from "@shared/schema";
 import { getCurrentPayPeriod, getPayPeriodForDate, type PayPeriod } from "@shared/payPeriodUtils";
 import { db } from "./db";
@@ -69,6 +72,13 @@ export interface IStorage {
 
   // Enhanced job methods
   updateJob(id: string, data: Partial<Job>): Promise<Job | null>;
+
+  // Achievement config methods
+  getAchievementConfigs(): Promise<AchievementConfig[]>;
+  getAchievementConfig(id: string): Promise<AchievementConfig | undefined>;
+  createAchievementConfig(config: InsertAchievementConfig): Promise<AchievementConfig>;
+  updateAchievementConfig(id: string, config: Partial<InsertAchievementConfig>): Promise<AchievementConfig>;
+  deleteAchievementConfig(id: string): Promise<boolean>;
 
   // Dashboard specific methods
   getDashboardData(): Promise<{
@@ -672,6 +682,35 @@ export class DatabaseStorage implements IStorage {
 
   async getAllJobs(): Promise<Job[]> {
     return await db.select().from(jobs).orderBy(desc(jobs.createdAt));
+  }
+
+  // Achievement config methods
+  async getAchievementConfigs(): Promise<AchievementConfig[]> {
+    return db.select().from(achievementConfigs).where(eq(achievementConfigs.isActive, true));
+  }
+
+  async getAchievementConfig(id: string): Promise<AchievementConfig | undefined> {
+    const [config] = await db.select().from(achievementConfigs).where(eq(achievementConfigs.id, id));
+    return config || undefined;
+  }
+
+  async createAchievementConfig(config: InsertAchievementConfig): Promise<AchievementConfig> {
+    const [newConfig] = await db.insert(achievementConfigs).values(config).returning();
+    return newConfig;
+  }
+
+  async updateAchievementConfig(id: string, config: Partial<InsertAchievementConfig>): Promise<AchievementConfig> {
+    const [updatedConfig] = await db
+      .update(achievementConfigs)
+      .set({ ...config, updatedAt: new Date() })
+      .where(eq(achievementConfigs.id, id))
+      .returning();
+    return updatedConfig;
+  }
+
+  async deleteAchievementConfig(id: string): Promise<boolean> {
+    const result = await db.delete(achievementConfigs).where(eq(achievementConfigs.id, id));
+    return result.rowCount > 0;
   }
 }
 
