@@ -154,19 +154,35 @@ export class DatabaseStorage implements IStorage {
 
   async updateJob(id: string, updateData: Partial<InsertJob>): Promise<Job | null> {
     try {
+      console.log('Updating job with data:', updateData);
+      
       // Handle timestamp conversion for all date fields
       const cleanedData: any = { ...updateData };
       
       // Convert string dates to Date objects for Drizzle
-      if (cleanedData.completedAt && typeof cleanedData.completedAt === 'string') {
-        cleanedData.completedAt = new Date(cleanedData.completedAt);
+      if (cleanedData.completedAt) {
+        if (typeof cleanedData.completedAt === 'string') {
+          cleanedData.completedAt = new Date(cleanedData.completedAt);
+        }
+        // If status is completed but no completedAt provided, set to now
+        if (cleanedData.status === 'completed' && !cleanedData.completedAt) {
+          cleanedData.completedAt = new Date();
+        }
       }
+      
+      // Set completedAt when status changes to completed
+      if (cleanedData.status === 'completed' && !cleanedData.completedAt) {
+        cleanedData.completedAt = new Date();
+      }
+      
       if (cleanedData.startDate && typeof cleanedData.startDate === 'string') {
         cleanedData.startDate = new Date(cleanedData.startDate);
       }
       if (cleanedData.endDate && typeof cleanedData.endDate === 'string') {
         cleanedData.endDate = new Date(cleanedData.endDate);
       }
+      
+      console.log('Cleaned data for update:', cleanedData);
       
       const [updatedJob] = await db
         .update(jobs)
