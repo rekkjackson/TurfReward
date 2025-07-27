@@ -90,41 +90,44 @@ export function AchievementBadges() {
         ) : (
           <div className="space-y-3">
             {achievements.slice(0, 5).map((achievement: Achievement, index: number) => {
-              const IconComponent = iconMap[achievement.icon as keyof typeof iconMap] || Trophy;
+              const IconComponent = iconMap[achievement.achievement.icon as keyof typeof iconMap] || Trophy;
               
               return (
                 <motion.div
-                  key={achievement.id}
+                  key={achievement.achievement.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                   className="flex items-center space-x-3 p-3 bg-slate-800/30 rounded-lg hover:bg-slate-800/50 transition-colors"
                 >
-                  <div className={`p-2 rounded-full ${achievement.color}`}>
+                  <div className={`p-2 rounded-full ${achievement.achievement.color}`}>
                     <IconComponent className="w-4 h-4 text-white" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <h4 className="font-medium text-white truncate">
-                        {achievement.title}
+                        {achievement.achievement.title}
                       </h4>
-                      {achievement.value && achievement.value !== '0' && (
+                      {achievement.achievement.value && achievement.achievement.value !== '0' && (
                         <Badge variant="secondary" className="text-xs">
-                          {achievement.type === 'efficiency_master' && `${parseFloat(achievement.value).toFixed(0)}%`}
-                          {achievement.type === 'revenue_champion' && `$${parseFloat(achievement.value).toFixed(0)}`}
-                          {achievement.type === 'consistency_pro' && `${achievement.value} days`}
-                          {achievement.type === 'team_leader' && `${achievement.value} jobs`}
+                          {achievement.achievement.type === 'efficiency_master' && `${parseFloat(achievement.achievement.value).toFixed(0)}%`}
+                          {achievement.achievement.type === 'revenue_champion' && `$${parseFloat(achievement.achievement.value).toFixed(0)}`}
+                          {achievement.achievement.type === 'profit_king' && `$${parseFloat(achievement.achievement.value).toFixed(0)}`}
+                          {achievement.achievement.type === 'super_efficient' && `${parseFloat(achievement.achievement.value).toFixed(0)}%`}
+                          {achievement.achievement.type === 'marathon_worker' && `${achievement.achievement.value} days`}
+                          {achievement.achievement.type === 'team_captain' && `${achievement.achievement.value} jobs`}
+                          {achievement.achievement.type === 'perfectionist' && `${achievement.achievement.value} jobs`}
                         </Badge>
                       )}
                     </div>
                     
                     <p className="text-sm text-gray-400 truncate">
-                      {achievement.employee.name} • {achievement.description}
+                      {achievement.employee.name} • {achievement.achievement.description}
                     </p>
                     
                     <p className="text-xs text-gray-500 mt-1">
-                      {new Date(achievement.earnedAt).toLocaleDateString()}
+                      {new Date(achievement.achievement.earnedAt).toLocaleDateString()}
                     </p>
                   </div>
                 </motion.div>
