@@ -100,8 +100,8 @@ export default function Dashboard() {
         <div className="flex-1 space-y-6 overflow-y-auto min-h-0">
           {/* Monthly Revenue Thermometer */}
           <MonthlyRevenueThermometer 
-            currentRevenue={todayMetrics?.dailyRevenue || 0}
-            monthlyGoal={todayMetrics?.monthlyRevenueGoal || 200000}
+            currentRevenue={todayMetrics?.monthlyRevenue || 0}
+            monthlyGoal={todayMetrics?.monthlyRevenueGoal || 15000}
           />
 
           {/* Company Metrics Row */}

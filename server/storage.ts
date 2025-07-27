@@ -361,6 +361,17 @@ export class DatabaseStorage implements IStorage {
     const completedJobsFiltered = completedJobs.filter(job => job.status === 'completed');
     const dailyRevenue = completedJobsFiltered.reduce((sum, job) => sum + parseFloat(job.laborRevenue || '0'), 0);
     
+    // Calculate monthly revenue from completed jobs this month
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+    const monthlyCompletedJobs = completedJobs.filter(job => 
+      job.status === 'completed' && 
+      job.completedAt && 
+      new Date(job.completedAt) >= monthStart && 
+      new Date(job.completedAt) <= monthEnd
+    );
+    const monthlyRevenue = monthlyCompletedJobs.reduce((sum, job) => sum + parseFloat(job.laborRevenue || '0'), 0);
+    
     // console.log(`Revenue calculation: ${completedJobsFiltered.length} completed jobs, $${dailyRevenue} total revenue`);
     
     // Calculate company-wide efficiency from actual job assignments
@@ -435,6 +446,7 @@ export class DatabaseStorage implements IStorage {
     effectiveMetrics.landscapingJobsCompleted = Number(landscapingJobsToday?.count || 0);
     effectiveMetrics.dailyRevenue = dailyRevenue;
     effectiveMetrics.dailyRevenueGoal = dailyRevenueGoal;
+    effectiveMetrics.monthlyRevenue = monthlyRevenue;
     effectiveMetrics.monthlyRevenueGoal = monthlyRevenueGoal;
     effectiveMetrics.mowingAverageEfficiency = companyEfficiency;
     effectiveMetrics.overallEfficiency = companyEfficiency;
