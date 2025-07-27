@@ -372,6 +372,7 @@ export class DatabaseStorage implements IStorage {
     );
     const monthlyRevenue = monthlyCompletedJobs.reduce((sum, job) => sum + parseFloat(job.laborRevenue || '0'), 0);
     console.log(`Monthly revenue calculation: ${monthlyCompletedJobs.length} jobs, $${monthlyRevenue} total`);
+    console.log(`About to return monthlyRevenue: ${monthlyRevenue}`);
     
     // console.log(`Revenue calculation: ${completedJobsFiltered.length} completed jobs, $${dailyRevenue} total revenue`);
     
@@ -454,6 +455,8 @@ export class DatabaseStorage implements IStorage {
     effectiveMetrics.mowingAverageEfficiency = companyEfficiency;
     effectiveMetrics.overallEfficiency = companyEfficiency;
     effectiveMetrics.id = 'live-calculated';
+    
+    console.log(`effectiveMetrics.monthlyRevenue set to: ${effectiveMetrics.monthlyRevenue}`);
     
     console.log(`Final metrics: daily=$${dailyRevenue}, monthly=$${monthlyRevenue}`);
 
@@ -584,6 +587,7 @@ export class DatabaseStorage implements IStorage {
         cleanupEfficiency: 88,
         overallEfficiency: companyEfficiency,
         dailyRevenue: dailyRevenue,
+        monthlyRevenue: Number(monthlyRevenue) || 0,
         mowingRevenue: mowingRevenue,
         landscapingRevenue: landscapingRevenue,
         maintenanceRevenue: maintenanceRevenue,
