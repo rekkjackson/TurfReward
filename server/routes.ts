@@ -116,7 +116,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/jobs/:id", async (req, res) => {
     try {
       console.log('Updating job:', req.params.id, req.body);
-      const job = await storage.updateJob(req.params.id, req.body);
+      
+      // Handle date conversion at the route level
+      const updateData = { ...req.body };
+      if (updateData.completedAt && typeof updateData.completedAt === 'string') {
+        updateData.completedAt = new Date(updateData.completedAt);
+      }
+      if (updateData.status === 'completed' && !updateData.completedAt) {
+        updateData.completedAt = new Date();
+      }
+      
+      const job = await storage.updateJob(req.params.id, updateData);
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
