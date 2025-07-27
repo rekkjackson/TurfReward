@@ -363,11 +363,16 @@ export class DatabaseStorage implements IStorage {
       console.log(`Company efficiency calculated: ${companyEfficiency}% from ${validAssignments.length} assignments`);
     }
     
-    // Get configurable daily revenue goal from P4P configs (use first config's goal or default)
+    // Get configurable monthly revenue goal from P4P configs
     const p4pConfigs = await this.getP4PConfigs();
-    const dailyRevenueGoal = p4pConfigs.length > 0 ? 
-      parseFloat(p4pConfigs[0].minimumWage || '23') * 8 * 10 * 3.5 : // Estimate: min wage × 8hrs × 10 employees × efficiency multiplier
-      6500; // Fallback
+    const monthlyRevenueGoal = p4pConfigs.length > 0 ? 
+      parseFloat(p4pConfigs[0].monthlyRevenueGoal || '200000') : 
+      200000; // Fallback monthly goal
+    
+    // Calculate daily goal based on current month progress
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const dailyRevenueGoal = monthlyRevenueGoal / daysInMonth;
     
     // If no metrics for today, create base metrics with real calculated data  
     const effectiveMetrics = todayMetrics || {
@@ -391,6 +396,7 @@ export class DatabaseStorage implements IStorage {
     effectiveMetrics.landscapingJobsCompleted = Number(landscapingJobsToday?.count || 0);
     effectiveMetrics.dailyRevenue = dailyRevenue;
     effectiveMetrics.dailyRevenueGoal = dailyRevenueGoal;
+    effectiveMetrics.monthlyRevenueGoal = monthlyRevenueGoal;
     effectiveMetrics.mowingAverageEfficiency = companyEfficiency;
     effectiveMetrics.overallEfficiency = companyEfficiency;
     effectiveMetrics.id = 'live-calculated';

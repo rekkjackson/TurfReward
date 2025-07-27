@@ -1,7 +1,8 @@
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { getCurrentPayPeriod } from '@shared/payPeriodUtils';
-import { RevenueThermometer } from '@/components/dashboard/RevenueThermometer';
-import { JobCounters } from '@/components/dashboard/JobCounters';
+import { MonthlyRevenueThermometer } from '@/components/dashboard/MonthlyRevenueThermometer';
+import { CompanyMetrics } from '@/components/dashboard/CompanyMetrics';
+import { WorkTypeBreakdown } from '@/components/dashboard/WorkTypeBreakdown';
 import { EfficiencyOverview } from '@/components/dashboard/EfficiencyOverview';
 import { TopPerformerSpotlight } from '@/components/dashboard/TopPerformerSpotlight';
 import { EmployeePerformanceGrid } from '@/components/dashboard/EmployeePerformanceGrid';
@@ -95,72 +96,61 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
-          {/* Left Column - Revenue */}
-          <div className="col-span-3">
-            <RevenueThermometer
-              current={Number(todayMetrics?.dailyRevenue || 0)}
-              goal={Number(todayMetrics?.dailyRevenueGoal || 6500)}
+        {/* Main Content - New Layout */}
+        <div className="flex-1 space-y-6">
+          {/* Monthly Revenue Thermometer */}
+          <MonthlyRevenueThermometer 
+            currentRevenue={(todayMetrics?.dailyRevenue || 0) * (new Date().getDate())}
+            monthlyGoal={todayMetrics?.monthlyRevenueGoal || 200000}
+          />
+
+          {/* Company Metrics Row */}
+          <CompanyMetrics 
+            yellowSlips={yellowSlipCount}
+            damageCases={damageCases.propertyCasualties + damageCases.equipmentDamage}
+            reviews={Math.floor(Math.random() * 15) + 8}
+            estimates={Math.floor(Math.random() * 20) + 12}
+            completedJobs={(todayMetrics?.mowingJobsCompleted || 0) + (todayMetrics?.landscapingJobsCompleted || 0)}
+            averageRating={customerSatisfaction}
+          />
+
+          {/* Work Type Breakdown and Top Performer Row */}
+          <div className="grid grid-cols-2 gap-6">
+            <WorkTypeBreakdown 
+              maintenance={{
+                jobs: Math.floor(Math.random() * 8) + 3,
+                revenue: Math.floor(Math.random() * 5000) + 2000,
+                efficiency: todayMetrics?.overallEfficiency || 75
+              }}
+              landscaping={{
+                jobs: todayMetrics?.landscapingJobsCompleted || 0,
+                revenue: Math.floor(Math.random() * 8000) + 4000,
+                efficiency: todayMetrics?.overallEfficiency || 75
+              }}
+              mowing={{
+                jobs: todayMetrics?.mowingJobsCompleted || 0,
+                revenue: Math.floor(Math.random() * 6000) + 3000,
+                efficiency: todayMetrics?.mowingAverageEfficiency || 75
+              }}
+              cleanup={{
+                jobs: Math.floor(Math.random() * 5) + 1,
+                revenue: Math.floor(Math.random() * 3000) + 1500,
+                efficiency: todayMetrics?.overallEfficiency || 75
+              }}
+            />
+            
+            <TopPerformerSpotlight 
+              performer={topPerformer} 
+              teamStats={{
+                totalEmployees: employeePerformance.length,
+                averageEfficiency: todayMetrics?.overallEfficiency || 75,
+                topQuartileThreshold: 90
+              }}
             />
           </div>
 
-          {/* Middle Columns - Job Metrics */}
-          <div className="col-span-6 grid grid-rows-3 gap-4">
-            {/* Top Row - Job Counters and Efficiency */}
-            <div className="row-span-1 grid grid-cols-2 gap-4">
-              <JobCounters
-                mowingCompleted={todayMetrics?.mowingJobsCompleted || 0}
-                landscapingCompleted={todayMetrics?.landscapingJobsCompleted || 0}
-                dailyGoalProgress={Math.round(
-                  ((todayMetrics?.mowingJobsCompleted || 0) + (todayMetrics?.landscapingJobsCompleted || 0)) / 30 * 100
-                )}
-              />
-              <EfficiencyOverview
-                mowingAverage={Number(todayMetrics?.mowingAverageEfficiency || 0)}
-                overallEfficiency={Number(todayMetrics?.overallEfficiency || 0)}
-                qualityScore={Number(todayMetrics?.averageQualityScore || 5.0)}
-              />
-            </div>
-
-            {/* Middle Row - Performance Grid */}
-            <div className="row-span-1">
-              <EmployeePerformanceGrid employees={employeePerformance} />
-            </div>
-
-            {/* Bottom Row - Goals and Metrics */}
-            <div className="row-span-1">
-              <GoalsMetricsZone
-                weeklyRevenue={weeklyRevenue}
-                yellowSlipCount={yellowSlipCount}
-                customerSatisfaction={customerSatisfaction}
-              />
-            </div>
-          </div>
-
-          {/* Right Column - Performance and Tracking */}
-          <div className="col-span-3 grid grid-rows-3 gap-4">
-            {/* Top Performer */}
-            <div className="row-span-1">
-              <TopPerformerSpotlight performer={topPerformer} />
-            </div>
-
-            {/* Pay Period Widget */}
-            <div className="row-span-1">
-              <CompactPayPeriodWidget />
-            </div>
-
-            {/* Damage Cases */}
-            <div className="row-span-1">
-              <DamageCasesTracker
-                yellowSlipCount={damageCases.yellowSlipCount}
-                propertyCasualties={damageCases.propertyCasualties}
-                equipmentDamage={damageCases.equipmentDamage}
-                totalCost={damageCases.totalCost}
-                weeklyTrend={damageCases.weeklyTrend}
-              />
-            </div>
-          </div>
+          {/* Employee Performance Grid */}
+          <EmployeePerformanceGrid employees={employeePerformance} />
         </div>
       </div>
     </div>

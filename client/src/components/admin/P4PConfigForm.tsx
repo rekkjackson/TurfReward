@@ -31,7 +31,7 @@ export function P4PConfigForm() {
       trainingBonusPerHour: '4.00',
       largejobBonusThreshold: 49,
       largejobBonusPerHour: '1.50',
-      dailyRevenueGoal: '6500.00',
+      monthlyRevenueGoal: '200000.00',
       isActive: true,
     },
   });
@@ -78,7 +78,7 @@ export function P4PConfigForm() {
       trainingBonusPerHour: config.trainingBonusPerHour || '4.00',
       largejobBonusThreshold: config.largejobBonusThreshold || 49,
       largejobBonusPerHour: config.largejobBonusPerHour || '1.50',
-      dailyRevenueGoal: config.dailyRevenueGoal || '6500.00',
+      monthlyRevenueGoal: config.monthlyRevenueGoal || '200000.00',
       isActive: config.isActive ?? true,
     });
   };
@@ -114,9 +114,9 @@ export function P4PConfigForm() {
                     <p className="text-sm text-muted-foreground">
                       Min: ${config.minimumHourlyRate}/hr
                     </p>
-                    {config.dailyRevenueGoal && (
+                    {config.monthlyRevenueGoal && (
                       <p className="text-sm text-muted-foreground">
-                        Goal: ${config.dailyRevenueGoal}/day
+                        Goal: ${config.monthlyRevenueGoal}/month
                       </p>
                     )}
                   </div>
@@ -274,15 +274,15 @@ export function P4PConfigForm() {
 
               <FormField
                 control={form.control}
-                name="dailyRevenueGoal"
+                name="monthlyRevenueGoal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Daily Revenue Goal ($)</FormLabel>
+                    <FormLabel>Monthly Revenue Goal ($)</FormLabel>
                     <FormControl>
                       <Input {...field} type="number" step="0.01" />
                     </FormControl>
                     <FormDescription>
-                      Company-wide daily revenue target for dashboard display
+                      Company-wide monthly revenue target for dashboard thermometer
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

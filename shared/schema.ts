@@ -23,7 +23,7 @@ export const p4pConfigs = pgTable("p4p_configs", {
   trainingBonusPerHour: decimal("training_bonus_per_hour", { precision: 10, scale: 2 }).default("4.00"),
   largejobBonusThreshold: integer("largejob_bonus_threshold").default(49), // hours
   largejobBonusPerHour: decimal("largejob_bonus_per_hour", { precision: 10, scale: 2 }).default("1.50"),
-  dailyRevenueGoal: decimal("daily_revenue_goal", { precision: 10, scale: 2 }).default("6500.00"),
+  monthlyRevenueGoal: decimal("monthly_revenue_goal", { precision: 12, scale: 2 }).default("200000.00"),
   isActive: boolean("is_active").default(true),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -48,6 +48,7 @@ export const jobs = pgTable("jobs", {
   estimatedDuration: integer("estimated_duration_days").default(1),
   isLargejob: boolean("is_largejob").default(false), // 49+ budgeted hours
   isSeasonalBonus: boolean("is_seasonal_bonus").default(false), // March-May 40% vs 33%
+  spansPayPeriods: boolean("spans_pay_periods").default(false), // Job spans multiple pay periods
   notes: text("notes"),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
