@@ -157,6 +157,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertJobAssignmentSchema.parse(req.body);
       console.log('Validated job assignment data:', validatedData);
       const assignment = await storage.createJobAssignment(validatedData);
+      
+      // Automatically calculate P4P for this assignment
+      console.log(`Triggering P4P calculation for assignment: ${assignment.id}`);
+      try {
+        const { P4PCalculationEngine } = await import('./p4pCalculations');
+        const p4pResult = await P4PCalculationEngine.calculateP4PForAssignment(assignment.id);
+        
+        if (p4pResult) {
+          // Update assignment with calculated P4P
+          await storage.updateJobAssignment(assignment.id, {
+            performancePay: p4pResult.performancePay.toFixed(2)
+          });
+          console.log(`P4P calculated: $${p4pResult.performancePay.toFixed(2)} for assignment ${assignment.id}`);
+        }
+      } catch (p4pError) {
+        console.error('P4P calculation failed:', p4pError);
+      }
+      
       res.status(201).json(assignment);
     } catch (error) {
       console.error('Error creating job assignment:', error);
@@ -164,6 +182,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Invalid job assignment data", 
         error: error instanceof Error ? error.message : 'Unknown error'
       });
+    }
+  });
+
+  // P4P Calculation route
+  app.post("/api/p4p-calculate", async (req, res) => {
+    try {
+      const { assignmentId } = req.body;
+      if (!assignmentId) {
+        return res.status(400).json({ message: "Assignment ID required" });
+      }
+
+      const { P4PCalculationEngine } = await import('./p4pCalculations');
+      const p4pResult = await P4PCalculationEngine.calculateP4PForAssignment(assignmentId);
+      
+      if (!p4pResult) {
+        return res.status(404).json({ message: "Could not calculate P4P for this assignment" });
+      }
+
+      // Update assignment with calculated P4P
+      await storage.updateJobAssignment(assignmentId, {
+        performancePay: p4pResult.performancePay.toFixed(2)
+      });
+
+      console.log(`P4P calculated: $${p4pResult.performancePay.toFixed(2)} for assignment ${assignmentId}`);
+      res.json(p4pResult);
+    } catch (error) {
+      console.error('P4P calculation error:', error);
+      res.status(500).json({ message: "P4P calculation failed" });
     }
   });
 

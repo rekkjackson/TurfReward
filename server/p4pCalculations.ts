@@ -76,8 +76,16 @@ export class P4PCalculationEngine {
       // Calculate base P4P using business rules
       const revenuePercentage = parseFloat(p4pConfig.laborRevenuePercentage || '33') / 100;
       
+      // Debug logging (can be removed in production)
+      // console.log(`P4P Calculation Debug for ${assignmentId}:`);
+      // console.log(`  Labor Revenue: $${laborRevenue}`);
+      // console.log(`  Revenue Percentage: ${revenuePercentage * 100}%`);
+      // console.log(`  Team Size: ${teamSize}`);
+      // console.log(`  Hours Worked: ${hoursWorked}`);
+      
       // Base calculation: % of labor revenue split among team
       const baseCalculation = (laborRevenue * revenuePercentage) / teamSize;
+      console.log(`  Base Calculation: $${baseCalculation.toFixed(2)}`);
       
       // Training bonus: $4/hour if isTraining = true
       const trainingBonus = assignment.assignment.isTraining ? 
