@@ -154,9 +154,11 @@ export class P4PCalculationEngine {
       console.log(`  Employee Base Rate: $${employeeBaseRate}/hour`);
       console.log(`  Minimum Pay (${totalHours}h × $${employeeBaseRate}): $${minimumPay.toFixed(2)}`);
       
-      // Final P4P amount (minimum wage is handled separately in payroll)
-      const finalP4P = totalP4P;
+      // Apply minimum wage protection using employee's base rate
+      const finalP4P = Math.max(totalP4P, minimumPay);
       const hourlyEquivalent = finalP4P / jobsiteHours; // P4P efficiency based on productive hours
+      
+      console.log(`  Final P4P: $${finalP4P.toFixed(2)} (max of P4P $${totalP4P.toFixed(2)} vs minimum $${minimumPay.toFixed(2)})`);
 
       return {
         assignmentId,
